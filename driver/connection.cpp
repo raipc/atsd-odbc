@@ -258,7 +258,7 @@ void Connection::loadConfiguration() {
 
 void Connection::setDefaults() {
     if (data_source.empty())
-        data_source = "ClickHouse";
+        data_source = "ATSD";
     if (!url.empty()) {
         Poco::URI uri(url);
         if (proto.empty())
@@ -266,9 +266,10 @@ void Connection::setDefaults() {
         if (server.empty())
             server = uri.getHost();
         if (port == 0) {
-            const auto tmp_port = uri.getPort();
-            if ((proto == "https" && tmp_port != 443) || (proto == "http" && tmp_port != 80))
-                port = tmp_port;
+            port = uri.getPort();
+            if(port == 0){
+                port = (proto == "https" ? 443 : 80);
+            }
         }
         if (path.empty())
             path = uri.getPath();
@@ -284,13 +285,13 @@ void Connection::setDefaults() {
     }
 
     if (proto.empty())
-        proto = (port == 8443 ? "https" : "http");
+        proto = (port == 8443 || port == 443? "https" : "http");
     if (server.empty())
         server = "localhost";
     if (port == 0)
-        port = (proto == "https" ? 8443 : 8123);
+        port = (proto == "https" ? 8443 : 8088);
     if (path.empty())
-        path = "query";
+        path = "odbc";
     if (path[0] != '/')
         path = "/" + path;
     if (stringmaxlength == 0)

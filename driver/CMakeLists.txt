@@ -105,18 +105,18 @@ endif()
 
 endfunction()
 
-makelib(clickhouse-odbc 0)
-makelib(clickhouse-odbcw 1)
+makelib(atsd-odbc 0)
+makelib(atsd-odbcw 1)
 
 if(ARCH_LINUX)
     target_link_libraries(clickhouse-odbcw PRIVATE Threads::Threads)
 endif()
 
-set_target_properties(clickhouse-odbc PROPERTIES OUTPUT_NAME "clickhouseodbc")
-set_target_properties(clickhouse-odbcw PROPERTIES OUTPUT_NAME "clickhouseodbcw")
+set_target_properties(atsd-odbc PROPERTIES OUTPUT_NAME "atsdodbc")
+set_target_properties(atsd-odbcw PROPERTIES OUTPUT_NAME "atsdodbcw")
 
 if (NOT WIN32)
-    install(FILES unixodbc.ini DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/clickhouse-odbc)
+    install(FILES unixodbc.ini DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/atsd)
     install(FILES odbc.ini DESTINATION ${CMAKE_INSTALL_DOCDIR}/examples)
 endif()
 

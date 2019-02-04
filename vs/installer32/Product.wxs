@@ -7,7 +7,7 @@
   <?endif?>
 
   <?define BIT64 = "no" ?>
-  <?define PKGNAME = "ClickHouse ODBC x32" ?>
+  <?define PKGNAME = "ATSD ODBC x32" ?>
   <?define PGFOLDER = "ProgramFilesFolder" ?>
   <?define DLL_PATH = "../$(var.Configuration)" ?>
 
@@ -39,21 +39,21 @@
     <!-- Package details -->
     <Package 
       Id='*'
-      Keywords="ClickHouse, ODBC"
-      Comments="ClickHouse ODBC driver"
-      Manufacturer="Yandex LLC"
+      Keywords="ATSD, ODBC"
+      Comments="ATSD ODBC driver"
+      Manufacturer="Axibase corp."
       InstallerVersion="301" 
       Platform="$(var.Platform)"
       Compressed="yes" 
       InstallScope="perMachine" />
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version of ClickHouse ODBC drivers is already installed." />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of ATSD ODBC drivers is already installed." />
     <MediaTemplate EmbedCab="yes" />
     
     <!-- Directories -->
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="$(var.PGFOLDER)">
-        <Directory Id="INSTALLFOLDER" Name="ClickHouse ODBC">
+        <Directory Id="INSTALLFOLDER" Name="ATSD ODBC">
           <!--Component Id ="PocoLibs" Guid="$(var.POCOLIB_ID)" Win64='$(var.BIT64)'>
             <File Id='PocoFoundationDll'
                   Name='$(var.POCO_FOUNDATION)'
@@ -79,24 +79,24 @@
           
           <Component Id="AnsiDriver" Guid="$(var.ANSI_ID)" Win64='$(var.BIT64)'>
             <File Id='AnsiDriverDll'
-                  Name='clickhouseodbc.dll'
+                  Name='atsdodbc.dll'
                   DiskId='1'
-                  Source='$(var.DLL_PATH)\clickhouseodbc.dll'
+                  Source='$(var.DLL_PATH)\atsdodbc.dll'
                   KeyPath='yes' />
 			<?if $(var.Configuration) = Debug ?>
 				<File Id='AnsiDriverPdb'
-					Name='clickhouseodbc.pdb'
+					Name='atsdodbc.pdb'
 					DiskId='1'
-					Source='$(var.DLL_PATH)\clickhouseodbc.pdb' />
+					Source='$(var.DLL_PATH)\atsdodbc.pdb' />
 			<?endif ?>
 				  
             <RegistryKey Id='AnsiOdbcRegInfo' 
                          Root='HKLM' 
-                         Key='SOFTWARE\ODBC\ODBCINST.INI\ClickHouse ANSI'
+                         Key='SOFTWARE\ODBC\ODBCINST.INI\ATSD ANSI'
                          ForceCreateOnInstall='yes'>
-              <RegistryValue Type='string' Name='Driver' Value='[INSTALLFOLDER]clickhouseodbc.dll'/>
-              <RegistryValue Type='string' Name='Setup' Value='[INSTALLFOLDER]clickhouseodbc.dll'/>
-              <RegistryValue Type='string' Name='Description' Value='ClickHouse ODBC ANSI'/>
+              <RegistryValue Type='string' Name='Driver' Value='[INSTALLFOLDER]atsdodbc.dll'/>
+              <RegistryValue Type='string' Name='Setup' Value='[INSTALLFOLDER]atsdodbc.dll'/>
+              <RegistryValue Type='string' Name='Description' Value='ATSD ODBC ANSI'/>
               <RegistryValue Type='string' Name='APILevel' Value='1'/>
               <RegistryValue Type='string' Name='DriverODBCVer' Value='03.80'/>
               <RegistryValue Type='string' Name='SQLLevel' Value='1'/>
@@ -107,29 +107,29 @@
                          Root='HKLM' 
                          Key='SOFTWARE\ODBC\ODBCINST.INI\ODBC Drivers'
                          ForceCreateOnInstall='yes'>
-              <RegistryValue Type='string' Name='ClickHouse ANSI' Value='Installed' />
+              <RegistryValue Type='string' Name='ATSD ANSI' Value='Installed' />
             </RegistryKey>
           </Component>
           <Component Id="UnicodeDriver" Guid="$(var.UNICODE_ID)" Win64='$(var.BIT64)'>
             <File Id='UnicodeDriverDll'
-                  Name='clickhouseodbcw.dll'
+                  Name='atsdodbcw.dll'
                   DiskId='1'
-                  Source='$(var.DLL_PATH)\clickhouseodbcw.dll'
+                  Source='$(var.DLL_PATH)\atsdodbcw.dll'
                   KeyPath='yes' />
 			<?if $(var.Configuration) = Debug ?>
 				<File Id='UnicodeDriverPdb'
-					Name='clickhouseodbcw.pdb'
+					Name='atsdodbcw.pdb'
 					DiskId='1'
-					Source='$(var.DLL_PATH)\clickhouseodbcw.pdb' />
+					Source='$(var.DLL_PATH)\atsdodbcw.pdb' />
 			<?endif ?>
 
             <RegistryKey Id='UnicodeOdbcRegInfo'
                          Root='HKLM'
-                         Key='SOFTWARE\ODBC\ODBCINST.INI\ClickHouse Unicode'
+                         Key='SOFTWARE\ODBC\ODBCINST.INI\ATSD Unicode'
                          ForceCreateOnInstall='yes'>
-              <RegistryValue Type='string' Name='Driver' Value='[INSTALLFOLDER]clickhouseodbcw.dll'/>
-              <RegistryValue Type='string' Name='Setup' Value='[INSTALLFOLDER]clickhouseodbcw.dll'/>
-              <RegistryValue Type='string' Name='Description' Value='ClickHouse ODBC Unicode'/>
+              <RegistryValue Type='string' Name='Driver' Value='[INSTALLFOLDER]atsdodbcw.dll'/>
+              <RegistryValue Type='string' Name='Setup' Value='[INSTALLFOLDER]atsdodbcw.dll'/>
+              <RegistryValue Type='string' Name='Description' Value='ATSD ODBC Unicode'/>
               <RegistryValue Type='string' Name='APILevel' Value='1'/>
               <RegistryValue Type='string' Name='DriverODBCVer' Value='03.80'/>
               <RegistryValue Type='string' Name='SQLLevel' Value='1'/>
@@ -140,7 +140,7 @@
                          Root='HKLM'
                          Key='SOFTWARE\ODBC\ODBCINST.INI\ODBC Drivers'
                          ForceCreateOnInstall='yes'>
-              <RegistryValue Type='string' Name='ClickHouse Unicode' Value='Installed' />
+              <RegistryValue Type='string' Name='ATSD Unicode' Value='Installed' />
             </RegistryKey>
           </Component>
           </Directory>
@@ -149,7 +149,7 @@
     </Directory>
 
     <!-- Features -->
-    <Feature Id='Complete' Title='ClickHouse ODBC' Description='The complete package.'
+    <Feature Id='Complete' Title='ATSD ODBC' Description='The complete package.'
     Display='expand' Level='1' ConfigurableDirectory='INSTALLFOLDER'>
       <Feature Id="AnsiDrivers"
                Title="ANSI drivers"

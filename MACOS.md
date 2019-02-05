@@ -8,7 +8,7 @@ Download and prepare:
 ```bash
 brew install git cmake
 git clone --recursive https://github.com/axibase/atsd-odbc
-cd atse-odbc
+cd atsd-odbc
 ```
 
 Before build with standard libiodbc:

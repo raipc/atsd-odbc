@@ -53,7 +53,7 @@ mkdir -p build; cd build && cmake .. && make -j $(nproc || sysctl -n hw.ncpu || 
 ```
 Please use cmake3 to build the project on CentOS 7. You can install it with `yum install cmake3`.
 
-2. libclickhouseodbc.so will be at ```build/driver/libclickhouseodbc.so```
+2. libatsdodbc.so will be at ```build/driver/libatsdodbc.so```
 
 ```
 mkdir -p build; cd build && cmake .. && make -j $(nproc || sysctl -n hw.ncpu || echo 4)
@@ -73,55 +73,3 @@ sudo pbuilder create --configfile debian/.pbuilderrc && pdebuild --configfile de
 
 ## Building (windows visual studio)
 ```cd vs && build_vs.bat```
-
-## Building (windows cmake) (Developer only: setup window still not working)
-```cd vs && build_cmake.bat```
-
-## Build with tests (needs configured ~/.odbc.ini with DSN=clickhouse_localhost)
-```mkdir -p build; cd build
-( cd ../contrib && git clone https://github.com/nanodbc/nanodbc )
-cmake -G Ninja -DTEST_DSN=clickhouse_localhost -DCMAKE_BUILD_TYPE=Debug -DUSE_DEBUG_17=1 .. && ninja
-ctest -V```
-
-
-## ODBC configuration
-
-edit ~/.odbc.ini :
-
-```(ini)
-[ClickHouse]
-Driver = $(PATH_OF_CLICKHOUSE_ODBC_SO)
-# Optional settings:
-#Description = ClickHouse driver
-# New all-in one way to specify connection with [optional] settings:
-#url = https://default:password@localhost:8443/query?database=default&max_result_bytes=4000000&buffer_size=3000000
-# Minimal (will connect to port 8443 if https:// or 8123 if http:// ):
-url = https://localhost
-
-# Old way:
-#server = localhost
-#password = 123456
-#database = default
-#uid = default
-#port = 8123
-
-# sslmode variants: allow - ignore self-signed and bad certificates; require - check certificates (and fail connection if something wrong)
-#sslmode = require
-#privatekeyfile =
-#certificatefile =
-#calocation =
-
-#trace=1
-#tracefile=/tmp/chlickhouse-odbc.log
-```
-
-Sometimes you should change ~/.odbcinst.ini or /etc/odbcinst.ini or /Library/ODBC/odbcinst.ini :
-```(ini)
-[Clickhouse]
-Driver=$(PATH_OF_CLICKHOUSE_ODBC_SO)
-```
-
-## Testing
-Run ```isql -v ClickHouse```
-
-Also look [test](test)/ contents

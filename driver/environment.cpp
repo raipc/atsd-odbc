@@ -43,7 +43,7 @@ const std::map<std::string, TypeInfo> Environment::types_info = {
 
 Environment::Environment() {
 #if OUTPUT_REDIRECT
-    std::string stderr_path = "/tmp/clickhouse-odbc-stderr";
+    std::string stderr_path = "/tmp/atsd-odbc-stderr";
 #    if _unix_
     struct passwd * pw;
     uid_t uid;

@@ -3,7 +3,7 @@
 set -e
 
 if [ -x /usr/bin/odbcinst ]; then
-    odbcinst -i -d -f /usr/share/clickhouse-odbc/unixodbc.ini
+    odbcinst -i -d -f /usr/share/atsd-odbc/unixodbc.ini
 fi
 
 #DEBHELPER#

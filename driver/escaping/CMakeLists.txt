@@ -1,7 +1,7 @@
-add_library(clickhouse-odbc-escaping
+add_library(atsd-odbc-escaping
     escape_sequences.cpp
     lexer.cpp
 )
 
-target_include_directories(clickhouse-odbc-escaping PUBLIC ..)
-target_link_libraries(clickhouse-odbc-escaping PRIVATE clickhouse-odbc-log)
+target_include_directories(atsd-odbc-escaping PUBLIC ..)
+target_link_libraries(atsd-odbc-escaping PRIVATE atsd-odbc-log)

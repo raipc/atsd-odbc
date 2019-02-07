@@ -1,4 +1,4 @@
-project (clickhouse-odbc)
+project (atsd-odbc)
 cmake_minimum_required (VERSION 2.6)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
@@ -69,11 +69,6 @@ if (WIN32)
     #set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
 endif ()
 
-option (CLICKHOUSE_ODBC_TEST "Enable tests" 1)
-if (CLICKHOUSE_ODBC_TEST)
-    enable_testing ()
-endif ()
-
 option (UNBUNDLED "Try find all libraries in system (if fail - use bundled from contrib/)" OFF)
 if (UNBUNDLED)
     set(NOT_UNBUNDLED 0)
@@ -120,10 +115,5 @@ message (STATUS "Building for: ${CMAKE_SYSTEM} ${CMAKE_SYSTEM_PROCESSOR} ${CMAKE
 
 add_subdirectory (contrib)
 add_subdirectory (driver)
-
-if(CLICKHOUSE_ODBC_TEST)
-    message(STATUS "TEST_DSN=${TEST_DSN} TEST_DSN_W=${TEST_DSN_W} ")
-    add_subdirectory(test)
-endif()
 
 include (cmake/print_flags.cmake)

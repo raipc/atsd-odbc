@@ -25,7 +25,7 @@ msbuild /m /p:Configuration=Debug odbc32.sln || exit
 copy Debug\*.dll "C:\Program Files (x86)\ATSD ODBC\"
 copy x64\Debug\*.dll "C:\Program Files\ATSD ODBC\"
 
-:: installer64\bin\Debug\clickhouse_odbc_x64.msi /quiet
-:: installer32\bin\Debug\clickhouse_odbc_x32.msi /quiet
-:: installer64\bin\Release\clickhouse_odbc_x64.msi /quiet
-:: installer32\bin\Release\clickhouse_odbc_x32.msi /quiet
+:: installer64\bin\Debug\atsd_odbc_x64.msi /quiet
+:: installer32\bin\Debug\atsd_odbc_x32.msi /quiet
+:: installer64\bin\Release\atsd_odbc_x64.msi /quiet
+:: installer32\bin\Release\atsd_odbc_x32.msi /quiet

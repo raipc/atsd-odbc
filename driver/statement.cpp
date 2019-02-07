@@ -63,7 +63,7 @@ void Statement::sendRequest(IResultMutatorPtr mutator) {
     uri.addQueryParameter("database",connection.getDatabase());
     uri.addQueryParameter("default_format", "ODBCDriver2");
     request.setURI(connection.path + "?" + uri.getQuery()); /// TODO escaping
-    request.set("User-Agent", "clickhouse-odbc/" VERSION_STRING " (" CMAKE_SYSTEM ")"
+    request.set("User-Agent", "atsd-odbc/" VERSION_STRING " (" CMAKE_SYSTEM ")"
 #if defined(UNICODE)
         " UNICODE"
 #endif

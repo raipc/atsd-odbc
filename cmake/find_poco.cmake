@@ -1,6 +1,6 @@
 option (USE_INTERNAL_POCO_LIBRARY "Set to FALSE to use system poco library instead of bundled" ${NOT_UNBUNDLED})
 
-if (NOT EXISTS "${clickhouse-odbc_SOURCE_DIR}/contrib/poco/CMakeLists.txt")
+if (NOT EXISTS "${atsd-odbc_SOURCE_DIR}/contrib/poco/CMakeLists.txt")
    if (USE_INTERNAL_POCO_LIBRARY)
       message (WARNING "submodule contrib/poco is missing. to fix try run: \n git submodule update --init --recursive")
    endif ()
@@ -63,8 +63,8 @@ elseif (NOT MISSING_INTERNAL_POCO_LIBRARY)
         set (Poco_NetSSL_LIBRARY PocoNetSSL)
         set (Poco_Crypto_LIBRARY PocoCrypto)
         list (APPEND Poco_INCLUDE_DIRS
-            "${clickhouse-odbc_SOURCE_DIR}/contrib/poco/NetSSL_OpenSSL/include"
-            "${clickhouse-odbc_SOURCE_DIR}/contrib/poco/Crypto/include"
+            "${atsd-odbc_SOURCE_DIR}/contrib/poco/NetSSL_OpenSSL/include"
+            "${atsd-odbc_SOURCE_DIR}/contrib/poco/Crypto/include"
         )
 
     endif ()

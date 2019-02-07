@@ -1,4 +1,4 @@
-add_library(clickhouse-odbc-win STATIC
+add_library(atsd-odbc-win STATIC
 	dllmain.cpp
 	resource.h
 	resource.rc

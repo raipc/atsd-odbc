@@ -17,9 +17,9 @@ extern bool log_enabled;
 #endif
 
 #if defined(_WIN32)
-#    define LOG_DEFAULT_FILE "/temp/clickhouse-odbc.log"
+#    define LOG_DEFAULT_FILE "/temp/atsd-odbc.log"
 #else
-#    define LOG_DEFAULT_FILE "/tmp/clickhouse-odbc.log"
+#    define LOG_DEFAULT_FILE "/tmp/atsd-odbc.log"
 #endif
 
 extern std::ofstream log_stream;

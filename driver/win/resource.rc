@@ -138,12 +138,12 @@ BEGIN
             VALUE "CompanyName", "Yandex"
             VALUE "FileDescription", "Clickhouse ODBC driver"
             VALUE "FileVersion", VERSION_STRING
-            VALUE "InternalName", "clickhouse-odbc"
+            VALUE "InternalName", "atsd-odbc"
             VALUE "LegalCopyright", "(c) 2017-2018"
             VALUE "LegalTrademarks", ""
             VALUE "OriginalFilename", ""
             VALUE "PrivateBuild", VERSION_EXTRA
-            VALUE "ProductName", "clickhouse-odbc"
+            VALUE "ProductName", "atsd-odbc"
             VALUE "ProductVersion", VERSION_STRING
             VALUE "SpecialBuild", ""
         END

@@ -1,4 +1,4 @@
-LIBRARY clickhouseodbc
+LIBRARY atsdodbc
 EXPORTS 
 
 DllMain                 @201

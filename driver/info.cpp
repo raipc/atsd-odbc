@@ -19,9 +19,9 @@
 #endif // ODBCVER >= 0x0380
 
 #if defined(UNICODE)
-#   define DRIVER_FILE_NAME "CLICKHOUSEODBCW.DLL"
+#   define DRIVER_FILE_NAME "ATSDODBCW.DLL"
 #else
-#   define DRIVER_FILE_NAME "CLICKHOUSEODBC.DLL"
+#   define DRIVER_FILE_NAME "ATSDODBC.DLL"
 #endif
 
 extern "C"
@@ -72,7 +72,7 @@ SQLGetInfo(HDBC connection_handle,
             CASE_STRING(SQL_DRIVER_ODBC_VER, "03.80")
             CASE_STRING(SQL_DM_VER, "03.80.0000.0000")
             CASE_STRING(SQL_DRIVER_NAME, DRIVER_FILE_NAME)
-            CASE_STRING(SQL_DBMS_NAME, "ClickHouse")
+            CASE_STRING(SQL_DBMS_NAME, "ATSD")
             CASE_STRING(SQL_DBMS_VER, "01.00.0000")
             CASE_STRING(SQL_SERVER_NAME, connection.server)
             CASE_STRING(SQL_DATA_SOURCE_NAME, connection.data_source)

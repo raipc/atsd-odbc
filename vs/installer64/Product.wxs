@@ -32,8 +32,8 @@
   <Product Id="$(var.PRODUCT_ID)"
            Name="$(var.PKGNAME)"
            Language="1033"
-           Version="1.0.0.20190201"
-           Manufacturer="Yandex LLC"
+           Version="1.0.0"
+           Manufacturer="Axibase"
            UpgradeCode="$(var.UPGRADE_ID)">
 
     <!-- Package details -->

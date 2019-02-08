@@ -53,7 +53,7 @@ END
 
 IDD_DIALOG1 DIALOGEX 0, 0, 195, 247
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Create datasource for ClickHouse"
+CAPTION "Create datasource for ATSD"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "Ok",IDOK,126,228,50,14
@@ -135,11 +135,11 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "Comments", ""
-            VALUE "CompanyName", "Yandex"
-            VALUE "FileDescription", "Clickhouse ODBC driver"
+            VALUE "CompanyName", "Axibase"
+            VALUE "FileDescription", "ATSD ODBC driver"
             VALUE "FileVersion", VERSION_STRING
             VALUE "InternalName", "atsd-odbc"
-            VALUE "LegalCopyright", "(c) 2017-2018"
+            VALUE "LegalCopyright", "(c) 2019"
             VALUE "LegalTrademarks", ""
             VALUE "OriginalFilename", ""
             VALUE "PrivateBuild", VERSION_EXTRA

@@ -120,6 +120,3 @@ if (NOT WIN32)
     install(FILES odbc.ini DESTINATION ${CMAKE_INSTALL_DOCDIR}/examples)
 endif()
 
-if(CLICKHOUSE_ODBC_TEST)
-    add_subdirectory(ut)
-endif()

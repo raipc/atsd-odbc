@@ -3,7 +3,7 @@
 set -e
 
 if [ -x /usr/bin/odbcinst ]; then
-    odbcinst -u -d -n Clickhouse
+    odbcinst -u -d -n ATSD
 fi
 
 #DEBHELPER#

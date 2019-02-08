@@ -127,7 +127,7 @@ void Connection::init(const std::string & dsn_,
 }
 
 void Connection::init(const std::string & connection_string) {
-    /// connection_string - string of the form `DSN=ClickHouse;UID=default;PWD=password`
+    /// connection_string - string of the form `DSN=ATSD;UID=default;PWD=password`
 
     const char * pos = connection_string.data();
     const char * end = pos + connection_string.size();
@@ -191,7 +191,7 @@ void Connection::init(const std::string & connection_string) {
 
 void Connection::loadConfiguration() {
     if (data_source.empty())
-        data_source = "ClickHouse";
+        data_source = "ATSD";
 
     ConnInfo ci;
     stringToTCHAR(data_source, ci.dsn);

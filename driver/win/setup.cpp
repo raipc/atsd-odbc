@@ -393,14 +393,11 @@ INT_PTR	CALLBACK
 
             SetDlgItemText(hdlg, IDC_DSN_NAME, ci->dsn);
             SetDlgItemText(hdlg, IDC_DESCRIPTION, ci->desc);
-            SetDlgItemText(hdlg, IDC_URL, ci->url);
             SetDlgItemText(hdlg, IDC_SERVER_HOST, ci->server);
             SetDlgItemText(hdlg, IDC_SERVER_PORT, ci->port);
-            SetDlgItemText(hdlg, IDC_DATABASE, ci->database);
             SetDlgItemText(hdlg, IDC_USER, ci->username);
             SetDlgItemText(hdlg, IDC_PASSWORD, ci->password);
-            SetDlgItemText(hdlg, IDC_TIMEOUT, ci->timeout);
-            SetDlgItemText(hdlg, IDC_SSLMODE, ci->sslmode);
+			SendDlgItemMessage(hdlg, IDC_SSLMODE, BM_SETCHECK, (stricmp(ci->sslmode, TEXT("require")) ? BST_CHECKED : BST_UNCHECKED), 0);
 
             return TRUE;		/* Focus was not set */
         }
@@ -414,14 +411,17 @@ INT_PTR	CALLBACK
 
                     GetDlgItemText(hdlg, IDC_DSN_NAME, ci->dsn, sizeof(ci->dsn));
                     GetDlgItemText(hdlg, IDC_DESCRIPTION, ci->desc, sizeof(ci->desc));
-                    GetDlgItemText(hdlg, IDC_URL, ci->url, sizeof(ci->url));
                     GetDlgItemText(hdlg, IDC_SERVER_HOST, ci->server, sizeof(ci->server));
                     GetDlgItemText(hdlg, IDC_SERVER_PORT, ci->port, sizeof(ci->port));
-                    GetDlgItemText(hdlg, IDC_DATABASE, ci->database, sizeof(ci->database));
                     GetDlgItemText(hdlg, IDC_USER, ci->username, sizeof(ci->username));
                     GetDlgItemText(hdlg, IDC_PASSWORD, ci->password, sizeof(ci->password));
-                    GetDlgItemText(hdlg, IDC_TIMEOUT, ci->timeout, sizeof(ci->timeout));
-                    GetDlgItemText(hdlg, IDC_SSLMODE, ci->sslmode, sizeof(ci->sslmode));
+					switch(SendDlgItemMessage(hdlg, IDC_SSLMODE, BM_GETCHECK, 0, 0)){
+						case BST_CHECKED: 
+							strcpy(ci->sslmode, TEXT(""));
+						break;
+						default:
+							strcpy(ci->sslmode, TEXT("require"));
+					}
 
                     /* Return to caller */
                 case IDCANCEL:

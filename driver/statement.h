@@ -55,7 +55,7 @@ public:
     void reset();
 
     /// Send request to a server.
-    void sendRequest(IResultMutatorPtr mutator = nullptr);
+    void sendRequest(IResultMutatorPtr mutator = nullptr, bool meta_mode = false);
 
 public:
     Connection & connection;

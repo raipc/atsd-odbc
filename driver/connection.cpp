@@ -257,6 +257,7 @@ void Connection::loadConfiguration() {
 }
 
 void Connection::setDefaults() {
+	meta_path = "/odbc/meta";
     if (data_source.empty())
         data_source = "ATSD";
     if (!url.empty()) {

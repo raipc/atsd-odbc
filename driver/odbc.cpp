@@ -660,68 +660,27 @@ RETCODE SQL_API FUNCTION_MAYBE_W(SQLTables)(HSTMT statement_handle,
         // Get a list of all tables in all databases.
         if (catalog_name != nullptr && catalog == SQL_ALL_CATALOGS && !schema_name && !table_name && !table_type)
         {
-            query << "SELECT"
-                     " database AS TABLE_CAT"
-                     ", '' AS TABLE_SCHEM"
-                     ", name AS TABLE_NAME"
-                     ", 'TABLE' AS TABLE_TYPE"
-                     ", '' AS REMARKS"
-                     " FROM system.tables"
-                     " ORDER BY TABLE_TYPE, TABLE_CAT, TABLE_SCHEM, TABLE_NAME";
+            query << "SELECT * FROM TABLES";
         }
         // Get a list of all tables in the current database.
         else if (!catalog_name && !schema_name && !table_name && !table_type)
         {
-            query << "SELECT"
-                     " database AS TABLE_CAT"
-                     ", '' AS TABLE_SCHEM"
-                     ", name AS TABLE_NAME"
-                     ", 'TABLE' AS TABLE_TYPE"
-                     ", '' AS REMARKS"
-                     " FROM system.tables"
-                     " WHERE (database == '";
-            query << statement.connection.getDatabase() << "')";
-            query << " ORDER BY TABLE_TYPE, TABLE_CAT, TABLE_SCHEM, TABLE_NAME";
+            query << "SELECT * FROM TABLES";
         }
         // Get a list of databases on the current connection's server.
         else if (!catalog.empty() && schema_name != nullptr && schema_name_length == 0 && table_name != nullptr && table_name_length == 0)
         {
-            query << "SELECT"
-                     " name AS TABLE_CAT"
-                     ", '' AS TABLE_SCHEM"
-                     ", '' AS TABLE_NAME"
-                     ", '' AS TABLE_TYPE"
-                     ", '' AS REMARKS"
-                     " FROM system.databases"
-                     " WHERE (1 == 1)";
-            query << " AND TABLE_CAT LIKE '" << catalog << "'";
-            query << " ORDER BY TABLE_CAT";
+            query << "SELECT * FROM DATABASES";
         }
         else
         {
-            query << "SELECT"
-                     " database AS TABLE_CAT"
-                     ", '' AS TABLE_SCHEM"
-                     ", name AS TABLE_NAME"
-                     ", 'TABLE' AS TABLE_TYPE"
-                     ", '' AS REMARKS"
-                     " FROM system.tables"
-                     " WHERE (1 == 1)";
-
-            if (catalog_name && catalog_name_length)
-                query << " AND TABLE_CAT LIKE '" << stringFromSQLSymbols(catalog_name, catalog_name_length) << "'";
-            //if (schema_name_length)
-            //    query << " AND TABLE_SCHEM LIKE '" << stringFromSQLSymbols(schema_name, schema_name_length) << "'";
+            query << "SELECT * FROM TABLES";
             if (table_name && table_name_length)
-                query << " AND TABLE_NAME LIKE '" << stringFromSQLSymbols(table_name, table_name_length) << "'";
-            //if (table_type_length)
-            //    query << " AND TABLE_TYPE = '" << stringFromSQLSymbols(table_type, table_type_length) << "'";
-
-            query << " ORDER BY TABLE_TYPE, TABLE_CAT, TABLE_SCHEM, TABLE_NAME";
+                query << " WHERE TABLE_NAME LIKE '" << stringFromSQLSymbols(table_name, table_name_length) << "'";
         }
 
         statement.setQuery(query.str());
-        statement.sendRequest();
+        statement.sendRequest(nullptr, true);
         return SQL_SUCCESS;
     });
 }
@@ -783,55 +742,23 @@ RETCODE SQL_API FUNCTION_MAYBE_W(SQLColumns)(HSTMT statement_handle,
     return doWith<Statement>(statement_handle, [&](Statement & statement) {
         std::stringstream query;
 
-        query << "SELECT"
-                 " database AS TABLE_CAT"   // 0
-                 ", '' AS TABLE_SCHEM"      // 1
-                 ", table AS TABLE_NAME"    // 2
-                 ", name AS COLUMN_NAME"    // 3
-                 ", type AS DATA_TYPE"      // 4
-                 ", '' AS TYPE_NAME"        // 5
-                 ", 0 AS COLUMN_SIZE"       // 6
-                 ", 0 AS BUFFER_LENGTH"     // 7
-                 ", 0 AS DECIMAL_DIGITS"    // 8
-                 ", 0 AS NUM_PREC_RADIX"    // 9
-                 ", 0 AS NULLABLE"          // 10
-                 ", 0 AS REMARKS"           // 11
-                 ", 0 AS COLUMN_DEF"        // 12
-                 ", 0 AS SQL_DATA_TYPE"     // 13
-                 ", 0 AS SQL_DATETIME_SUB"  // 14
-                 ", 0 AS CHAR_OCTET_LENGTH" // 15
-                 ", 0 AS ORDINAL_POSITION"  // 16
-                 ", 0 AS IS_NULLABLE"       // 17
-                 " FROM system.columns"
-                 " WHERE (1 == 1)";
-
+        query << "SELECT * FROM COLUMNS";
         std::string s;
-        s = stringFromSQLSymbols(catalog_name, catalog_name_length);
-        if (s.length() > 0)
-        {
-            query << " AND TABLE_CAT LIKE '" << s << "'";
-        }
-        else
-        {
-            query << " AND TABLE_CAT = currentDatabase()";
-        }
-
-        s = stringFromSQLSymbols(schema_name, schema_name_length);
-        if (s.length() > 0)
-            query << " AND TABLE_SCHEM LIKE '" << s << "'";
-
+		bool where_is_set = false;
         s = stringFromSQLSymbols(table_name, table_name_length);
-        if (s.length() > 0)
-            query << " AND TABLE_NAME LIKE '" << s << "'";
-
+        if (s.length() > 0){
+			query << " WHERE TABLE_NAME LIKE '" << s << "'";
+			where_is_set = true;
+		}
+            
         s = stringFromSQLSymbols(column_name, column_name_length);
-        if (s.length() > 0)
-            query << " AND COLUMN_NAME LIKE '" << s << "'";
-
-        query << " ORDER BY TABLE_CAT, TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION";
+        if (s.length() > 0){
+			query << (where_is_set ? " AND " : " WHERE ");
+			query << " COLUMN_NAME LIKE '" << s << "'";
+		}
 
         statement.setQuery(query.str());
-        statement.sendRequest(IResultMutatorPtr(new ColumnsMutator(&statement.connection.environment)));
+        statement.sendRequest(IResultMutatorPtr(new ColumnsMutator(&statement.connection.environment)), true);
         return SQL_SUCCESS;
     });
 }
@@ -923,7 +850,7 @@ RETCODE SQL_API SQLGetTypeInfo(HSTMT statement_handle, SQLSMALLINT type)
             query.str("SELECT 1 WHERE 0");
 
         statement.setQuery(query.str());
-        statement.sendRequest();
+        statement.sendRequest(nullptr, true);
         return SQL_SUCCESS;
     });
 }

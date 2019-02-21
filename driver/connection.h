@@ -16,6 +16,7 @@ struct Connection {
     std::string proto;
     std::string server;
     std::string path;
+	std::string meta_path;
     std::string user;
     std::string password;
     uint16_t port = 0;

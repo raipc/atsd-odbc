@@ -46,7 +46,7 @@ bool Statement::isPrepared() const {
     return prepared;
 }
 
-void Statement::sendRequest(IResultMutatorPtr mutator) {
+void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
     std::ostringstream user_password_base64;
     Poco::Base64Encoder base64_encoder(user_password_base64, Poco::BASE64_URL_ENCODING);
     base64_encoder << connection.user << ":" << connection.password;
@@ -60,9 +60,10 @@ void Statement::sendRequest(IResultMutatorPtr mutator) {
     request.setChunkedTransferEncoding(true);
     request.setCredentials("Basic", user_password_base64.str());
     Poco::URI uri(connection.url);
-    uri.addQueryParameter("database",connection.getDatabase());
-    uri.addQueryParameter("default_format", "ODBCDriver2");
-    request.setURI(connection.path + "?" + uri.getQuery()); /// TODO escaping
+    //uri.addQueryParameter("database",connection.getDatabase());
+    //uri.addQueryParameter("default_format", "ODBCDriver2");
+	std::string path = meta_mode ? connection.meta_path : connection.path;
+    request.setURI(path + "?" + uri.getQuery()); /// TODO escaping
     request.set("User-Agent", "atsd-odbc/" VERSION_STRING " (" CMAKE_SYSTEM ")"
 #if defined(UNICODE)
         " UNICODE"

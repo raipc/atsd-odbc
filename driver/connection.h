@@ -28,6 +28,10 @@ struct Connection {
     std::string privateKeyFile;
     std::string certificateFile;
     std::string caLocation;
+	
+	std::string tables;
+	bool expand_tags = false;
+	bool meta_columns = false;
 
     std::unique_ptr<Poco::Net::HTTPClientSession> session;
     DiagnosticRecord diagnostic_record;

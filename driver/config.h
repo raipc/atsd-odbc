@@ -30,6 +30,10 @@ struct ConnInfo {
     MYTCHAR privateKeyFile[MEDIUM_REGISTRY_LEN];
     MYTCHAR certificateFile[MEDIUM_REGISTRY_LEN];
     MYTCHAR caLocation[MEDIUM_REGISTRY_LEN];
+	MYTCHAR tables[MEDIUM_REGISTRY_LEN];
+	MYTCHAR expand_tags[SMALL_REGISTRY_LEN];
+	MYTCHAR meta_columns[SMALL_REGISTRY_LEN];
+	
 
     signed char disallow_premature = -1;
     signed char allow_keyset = -1;

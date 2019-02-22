@@ -254,6 +254,17 @@ void Connection::loadConfiguration() {
         certificateFile = stringFromMYTCHAR(ci.certificateFile);
     if (caLocation.empty())
         caLocation = stringFromMYTCHAR(ci.caLocation);
+	if(tables.empty()){
+		tables = stringFromMYTCHAR(ci.tables);
+	}
+	{
+		auto str = stringFromMYTCHAR(ci.expand_tags);
+		expand_tags = (str == "1" || str == "Yes" || str == "yes");
+	}
+	{
+		auto str = stringFromMYTCHAR(ci.meta_columns);
+		meta_columns = (str == "1" || str == "Yes" || str == "yes");
+	}
 }
 
 void Connection::setDefaults() {

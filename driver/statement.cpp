@@ -60,8 +60,20 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
     request.setChunkedTransferEncoding(true);
     request.setCredentials("Basic", user_password_base64.str());
     Poco::URI uri(connection.url);
-    //uri.addQueryParameter("database",connection.getDatabase());
-    //uri.addQueryParameter("default_format", "ODBCDriver2");
+	if(meta_mode){
+		if(!connection.tables.empty()){
+			std::string encoded;
+			Poco::URI::encode(connection.tables, "", encoded);
+			uri.addQueryParameter("tables",encoded);
+		}
+			
+		if(connection.expand_tags)
+			uri.addQueryParameter("expandTags", "true");
+		if(connection.meta_columns)
+			uri.addQueryParameter("metaColumns", "true");
+	}
+    
+    
 	std::string path = meta_mode ? connection.meta_path : connection.path;
     request.setURI(path + "?" + uri.getQuery()); /// TODO escaping
     request.set("User-Agent", "atsd-odbc/" VERSION_STRING " (" CMAKE_SYSTEM ")"

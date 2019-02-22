@@ -56,6 +56,9 @@ struct ConnInfo
     TCHAR		translation_option[SMALL_REGISTRY_LEN];
     TCHAR		focus_password;
     TCHAR		conn_settings[MEDIUM_REGISTRY_LEN];
+	TCHAR		tables[MEDIUM_REGISTRY_LEN];
+	TCHAR		expand_tags[SMALL_REGISTRY_LEN];
+	TCHAR		meta_columns[SMALL_REGISTRY_LEN];
     signed char	disallow_premature = -1;
     signed char	allow_keyset = -1;
     signed char	updatable_cursors = 0;
@@ -128,7 +131,9 @@ copyAttributes(ConnInfo *ci, LPCTSTR attribute, LPCTSTR value)
 
     else if (stricmp(attribute, INI_SSLMODE) == 0)
         strcpy(ci->sslmode, value);
-
+	
+	else if(stricmp(attribute, INI_TABLES) == 0 || stricmp(attribute, TEXT("tables")) == 0)
+		strcpy(ci->tables, value);
     else
         found = FALSE;
 
@@ -214,6 +219,15 @@ void getDSNinfo(ConnInfo *ci, bool overwrite)
 
     if (ci->sslmode[0] == '\0' || overwrite)
         SQLGetPrivateProfileString(DSN, INI_SSLMODE, TEXT(""), ci->sslmode, sizeof(ci->sslmode), ODBC_INI);
+	
+    if (ci->tables[0] == '\0' || overwrite)
+        SQLGetPrivateProfileString(DSN, INI_TABLES, TEXT(""), ci->tables, sizeof(ci->tables), ODBC_INI);	
+	
+	if (ci->expand_tags[0] == '\0' || overwrite)
+        SQLGetPrivateProfileString(DSN, INI_EXPANDTAGS, TEXT(""), ci->expand_tags, sizeof(ci->expand_tags), ODBC_INI);	
+	
+	if (ci->meta_columns[0] == '\0' || overwrite)
+        SQLGetPrivateProfileString(DSN, INI_METACOLUMNS, TEXT(""), ci->meta_columns, sizeof(ci->meta_columns), ODBC_INI);	
 }
 
 /*	This is for datasource based options only */
@@ -274,6 +288,21 @@ void writeDSNinfo(const ConnInfo * ci)
                                  INI_SSLMODE,
                                  ci->sslmode,
                                  ODBC_INI);
+								 
+	SQLWritePrivateProfileString(DSN,
+                                 INI_TABLES,
+                                 ci->tables,
+                                 ODBC_INI);	
+    	
+	SQLWritePrivateProfileString(DSN,
+                                 INI_EXPANDTAGS,
+                                 ci->expand_tags,
+                                 ODBC_INI);	
+
+	SQLWritePrivateProfileString(DSN,
+                                 INI_METACOLUMNS,
+                                 ci->meta_columns,
+                                 ODBC_INI);									 
 }
 
 static bool setDSNAttributes(HWND hwndParent, SetupDialogData * lpsetupdlg, DWORD * errcode)
@@ -397,7 +426,10 @@ INT_PTR	CALLBACK
             SetDlgItemText(hdlg, IDC_SERVER_PORT, ci->port);
             SetDlgItemText(hdlg, IDC_USER, ci->username);
             SetDlgItemText(hdlg, IDC_PASSWORD, ci->password);
+			SetDlgItemText(hdlg, IDC_TABLES, ci->tables);
 			SendDlgItemMessage(hdlg, IDC_SSLMODE, BM_SETCHECK, (stricmp(ci->sslmode, TEXT("require")) ? BST_CHECKED : BST_UNCHECKED), 0);
+			SendDlgItemMessage(hdlg, IDC_EXPAND_TAGS, BM_SETCHECK, (stricmp(ci->expand_tags, TEXT("1")) == 0 ? BST_CHECKED : BST_UNCHECKED), 0);
+			SendDlgItemMessage(hdlg, IDC_META_COLUMNS, BM_SETCHECK, (stricmp(ci->meta_columns, TEXT("1")) == 0 ? BST_CHECKED : BST_UNCHECKED), 0);
 
             return TRUE;		/* Focus was not set */
         }
@@ -415,12 +447,29 @@ INT_PTR	CALLBACK
                     GetDlgItemText(hdlg, IDC_SERVER_PORT, ci->port, sizeof(ci->port));
                     GetDlgItemText(hdlg, IDC_USER, ci->username, sizeof(ci->username));
                     GetDlgItemText(hdlg, IDC_PASSWORD, ci->password, sizeof(ci->password));
+					GetDlgItemText(hdlg, IDC_TABLES, ci->tables, sizeof(ci->tables));
 					switch(SendDlgItemMessage(hdlg, IDC_SSLMODE, BM_GETCHECK, 0, 0)){
 						case BST_CHECKED: 
 							strcpy(ci->sslmode, TEXT(""));
 						break;
 						default:
 							strcpy(ci->sslmode, TEXT("require"));
+					}
+					
+					switch(SendDlgItemMessage(hdlg, IDC_EXPAND_TAGS, BM_GETCHECK, 0, 0)){
+						case BST_CHECKED: 
+							strcpy(ci->expand_tags, TEXT("1"));
+						break;
+						default:
+							strcpy(ci->expand_tags, TEXT("0"));
+					}
+										
+					switch(SendDlgItemMessage(hdlg, IDC_META_COLUMNS, BM_GETCHECK, 0, 0)){
+						case BST_CHECKED: 
+							strcpy(ci->meta_columns, TEXT("1"));
+						break;
+						default:
+							strcpy(ci->meta_columns, TEXT("0"));
 					}
 
                     /* Return to caller */

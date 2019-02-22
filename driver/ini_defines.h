@@ -20,6 +20,9 @@
 #define INI_STRINGMAXLENGTH TEXT("StringMaxLength")
 #define INI_TRACE TEXT("Trace")
 #define INI_TRACEFILE TEXT("TraceFile")
+#define INI_TABLES TEXT("Tables")
+#define INI_EXPANDTAGS TEXT("ExpandTags")
+#define INI_METACOLUMNS TEXT("MetaColumns")
 
 #ifndef WIN32
 #    define ODBC_INI TEXT(".odbc.ini")

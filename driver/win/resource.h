@@ -14,6 +14,10 @@
 #define IDC_TIMEOUT                     1008
 #define IDC_SSLMODE                     1009
 #define IDC_URL                         1010
+#define IDC_TABLES						1011
+#define IDC_EXPAND_TAGS					1012
+#define IDC_META_COLUMNS				1013
+
 
 // Next default values for new objects
 // 

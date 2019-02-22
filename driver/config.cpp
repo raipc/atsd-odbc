@@ -26,6 +26,9 @@ ConnInfo::ConnInfo() {
     ZERO_FIELD(translation_dll);
     ZERO_FIELD(translation_option);
     ZERO_FIELD(conn_settings);
+	ZERO_FIELD(tables);
+	ZERO_FIELD(expand_tags);
+	ZERO_FIELD(meta_columns)
 
 #undef ZERO_FIELD
 }
@@ -49,6 +52,9 @@ void getDSNinfo(ConnInfo * ci, bool overwrite) {
     GET_CONFIG(stringmaxlength, INI_STRINGMAXLENGTH, "1048575");
     GET_CONFIG(trace, INI_TRACE, "");
     GET_CONFIG(tracefile, INI_TRACEFILE, LOG_DEFAULT_FILE);
+	GET_CONFIG(tables, INI_TABLES, "");
+	GET_CONFIG(expand_tags, INI_EXPANDTAGS, "");
+	GET_CONFIG(meta_columns, INI_METACOLUMNS, "");
 
 #undef GET_CONFIG
 }

@@ -114,7 +114,7 @@ RETCODE SQL_API FUNCTION_MAYBE_W(SQLExecDirect)(HSTMT statement_handle, SQLTCHAR
 
         LOG(__FUNCTION__ << " statement_text_size=" << statement_text_size << " statement_text=" << query );
 
-        if (!statement.isEmpty())
+        /*if (!statement.isEmpty())
         {
             if (!statement.isPrepared()) {
                 throw std::runtime_error("ExecDirect called, but statement query is not empty.");
@@ -124,6 +124,7 @@ RETCODE SQL_API FUNCTION_MAYBE_W(SQLExecDirect)(HSTMT statement_handle, SQLTCHAR
             }
         }
         else
+			*/
         {
             if (query.empty())
                 throw std::runtime_error("ExecDirect called with empty query.");

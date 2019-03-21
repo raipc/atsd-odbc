@@ -36,6 +36,7 @@ struct Environment {
 #else
         SQL_OV_ODBC3;
 #endif
+	std::string locale;
 
     DiagnosticRecord diagnostic_record;
 };

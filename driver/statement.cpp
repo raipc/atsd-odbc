@@ -72,7 +72,9 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
 		if(connection.meta_columns)
 			uri.addQueryParameter("metaColumns", "true");
 	}
-    
+    #if !defined(UNICODE)
+		uri.addQueryParameter("locale", connection.environment.locale);
+	#endif
     
 	std::string path = meta_mode ? connection.meta_path : connection.path;
     request.setURI(path + "?" + uri.getQuery()); /// TODO escaping

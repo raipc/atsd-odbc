@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include "win/version.h"
+#include <locale>
 
 #if defined(_unix_)
 #    include <pwd.h>
@@ -100,6 +101,10 @@ Environment::Environment() {
 #if defined(ODBC_INCLUDE_DIRECTORIES)
         report += " ODBC_INCLUDE_DIRECTORIES=" + std::string{ODBC_INCLUDE_DIRECTORIES};
 #endif
+
+	setlocale(LC_ALL, "");
+	Environment::locale = std::string{setlocale(LC_ALL, NULL)};
+	report += " locale=" + locale;
 
         LOG(" === Driver started ===" << report);
     }

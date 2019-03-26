@@ -37,6 +37,7 @@ struct Environment {
         SQL_OV_ODBC3;
 #endif
 	std::string locale;
+	unsigned int code_page = 0;
 
     DiagnosticRecord diagnostic_record;
 };

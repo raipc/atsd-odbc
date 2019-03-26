@@ -73,7 +73,16 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
 			uri.addQueryParameter("metaColumns", "true");
 	}
     #if !defined(UNICODE)
-		uri.addQueryParameter("locale", connection.environment.locale);
+	{
+		if(connection.environment.code_page > 0){
+			std::string contentType = "text/plain; charset=cp" + std::to_string(connection.environment.code_page);
+			request.setContentType(contentType);
+			uri.addQueryParameter("codePage", std::to_string(connection.environment.code_page));
+		}
+	    std::string encoded;
+		Poco::URI::encode(connection.environment.locale, "", encoded);
+		uri.addQueryParameter("locale", encoded);
+ 	}
 	#endif
     
 	std::string path = meta_mode ? connection.meta_path : connection.path;
@@ -84,7 +93,7 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
 #endif
     );
 
-    LOG(request.getMethod() << " " << connection.session->getHost() << request.getURI() <<  " body=" << prepared_query);
+    LOG(request.getMethod() << " " << connection.session->getHost() << request.getURI() << " Content Type=" << request.getContentType() <<  " body=" << prepared_query);
 
     // LOG("curl 'http://" << connection.session->getHost() << ":" << connection.session->getPort() << request.getURI() << "' -d '" << prepared_query << "'");
 

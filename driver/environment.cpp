@@ -12,6 +12,10 @@
 #    include <unistd.h>
 #endif
 
+#if defined(_win_)
+#include "windows.h"
+#endif;
+
 //#if __has_include("config_cmake.h") // requre c++17
 #if CMAKE_BUILD
 #    include "config_cmake.h"
@@ -101,6 +105,11 @@ Environment::Environment() {
 #if defined(ODBC_INCLUDE_DIRECTORIES)
         report += " ODBC_INCLUDE_DIRECTORIES=" + std::string{ODBC_INCLUDE_DIRECTORIES};
 #endif
+
+#if defined(_win_)
+	code_page = GetACP();
+	report += " CODE_PAGE = " + std::to_string(code_page);
+#endif;
 
 	setlocale(LC_ALL, "");
 	Environment::locale = std::string{setlocale(LC_ALL, NULL)};

@@ -3,6 +3,9 @@
 #include "connection.h"
 #include "result_set.h"
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/StreamConverter.h>
+#include <Poco/Windows1251Encoding.h>
+#include <Poco/UTF8Encoding.h>
 #include <memory>
 #include <sstream>
 
@@ -56,7 +59,10 @@ public:
 
     /// Send request to a server.
     void sendRequest(IResultMutatorPtr mutator = nullptr, bool meta_mode = false);
-
+	
+	void composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode = false);
+	
+	void processInsert();
 public:
     Connection & connection;
 
@@ -77,6 +83,8 @@ public:
     SQLULEN row_array_size = 1;
 
 private:
+
+	
     std::unique_ptr<Poco::Net::HTTPResponse> response;
 
     /// An SQLUINTEGER value that determines
@@ -87,4 +95,8 @@ private:
     std::string prepared_query;
     bool prepared = false;
     bool scan_escape_sequences = true;
+	std::ostream * out = nullptr;
+	Poco::UTF8Encoding utf8;
+	Poco::Windows1251Encoding windows1251;
+	std::unique_ptr<Poco::OutputStreamConverter> converter;
 };

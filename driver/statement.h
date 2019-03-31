@@ -6,6 +6,7 @@
 #include <Poco/StreamConverter.h>
 #include <Poco/Windows1251Encoding.h>
 #include <Poco/UTF8Encoding.h>
+#include <Poco/TextConverter.h>
 #include <memory>
 #include <sstream>
 
@@ -98,5 +99,6 @@ private:
 	std::ostream * out = nullptr;
 	Poco::UTF8Encoding utf8;
 	Poco::Windows1251Encoding windows1251;
+	Poco::TextConverter textConverter;
 	std::unique_ptr<Poco::OutputStreamConverter> converter;
 };

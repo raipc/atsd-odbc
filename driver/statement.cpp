@@ -8,7 +8,7 @@
 #include <Poco/URI.h>
 #include "string.h"
 
-Statement::Statement(Connection & conn_) : connection(conn_), metadata_id(conn_.environment.metadata_id) {
+Statement::Statement(Connection & conn_) : connection(conn_), metadata_id(conn_.environment.metadata_id), utf8(), windows1251(), textConverter(windows1251, utf8) {
     ard.reset(new DescriptorClass);
     apd.reset(new DescriptorClass);
     ird.reset(new DescriptorClass);
@@ -71,12 +71,11 @@ void Statement::composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode) 
 		if(connection.meta_columns)
 			uri.addQueryParameter("metaColumns", "true");
 	}
-	
+	std::string contentType = "text/plain; charset=utf-8";
+	request.setContentType(contentType);
 	#if !defined(UNICODE)
 	{
 		if(connection.environment.code_page > 0){
-			std::string contentType = "text/plain; charset=cp" + std::to_string(connection.environment.code_page);
-			request.setContentType(contentType);
 			uri.addQueryParameter("codePage", std::to_string(connection.environment.code_page));
 		}
 	    std::string encoded;
@@ -164,7 +163,9 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
     // Send request to server with finite count of retries.
     for (int i = 1;; ++i) {
         try {
-            connection.session->sendRequest(request) << prepared_query;
+			std::string utfString;
+			textConverter.convert(prepared_query, utfString);
+            connection.session->sendRequest(request) << utfString;
             response = std::make_unique<Poco::Net::HTTPResponse>();
             in = &connection.session->receiveResponse(*response);
             break;

@@ -59,6 +59,10 @@ void Statement::composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode) 
     request.setChunkedTransferEncoding(true);
     request.setCredentials("Basic", user_password_base64.str());
     Poco::URI uri(connection.url);
+	uri.addQueryParameter("version", std::string{VERSION_STRING});
+	std::ostringstream ss;
+    ss << std::this_thread::get_id();
+	uri.addQueryParameter("thread", ss.str());
 	if(meta_mode){
 		if(!connection.tables.empty()){
 			std::string encoded;
@@ -102,10 +106,7 @@ void Statement::processInsert() {
 	if(!out || !out->good()){
 		    Poco::Net::HTTPRequest request;
 			composeRequest(request);
-			if (in && in->peek() != EOF || out){
-				connection.session->reset();
-			}
-			
+			connection.session->reset();		
 		try {
             out = &connection.session->sendRequest(request);
 			converter = std::unique_ptr<Poco::OutputStreamConverter>(new Poco::OutputStreamConverter(*out, windows1251, utf8));
@@ -130,8 +131,8 @@ void Statement::processInsert() {
 			if (status != Poco::Net::HTTPResponse::HTTP_OK) {
 				error_message << std::endl << "HTTP status code: " << status << std::endl << "Received error:" << std::endl << in->rdbuf() << std::endl;
 			}
-		} catch(...) {
-			
+		} catch(std::exception &e2) {
+			LOG("Receiving response failed: " << e2.what());
 		}	
 		connection.session->reset();
 		throw std::runtime_error(error_message.str());

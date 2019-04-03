@@ -10,6 +10,8 @@
 #include <memory>
 #include <sstream>
 
+#define SLEEP_SECONDS 15
+
 /// Information where and how to add values when reading.
 struct Binding {
     SQLSMALLINT target_type;
@@ -23,6 +25,8 @@ struct DescriptorClass {};
 class Statement {
 public:
     Statement(Connection & conn_);
+	
+	virtual ~Statement();
 
     /// Whether the driver should scan the SQL string for escape sequences or not.
     bool getScanEscapeSequences() const;
@@ -64,6 +68,10 @@ public:
 	void composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode = false);
 	
 	void processInsert();
+	
+	void checkError();
+	
+	void sleep();
 public:
     Connection & connection;
 

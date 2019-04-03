@@ -13,6 +13,19 @@ Statement::Statement(Connection & conn_) : connection(conn_), metadata_id(conn_.
     apd.reset(new DescriptorClass);
     ird.reset(new DescriptorClass);
     ipd.reset(new DescriptorClass);
+	LOG("Statement created: " << this << " connection: " << &conn_);
+}
+
+Statement::~Statement(){
+	if(out){
+		try{
+			connection.session->reset();
+			connection.checkResponse = false;
+		} catch(...){
+			
+		}
+	}
+	LOG("Statement closed: " << this);
 }
 
 bool Statement::getScanEscapeSequences() const {
@@ -102,38 +115,63 @@ void Statement::composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode) 
 
 }
 
-void Statement::processInsert() {
-	if(!out || !out->good()){
-		    Poco::Net::HTTPRequest request;
-			composeRequest(request);
-			connection.session->reset();		
-		try {
-            out = &connection.session->sendRequest(request);
-			converter = std::unique_ptr<Poco::OutputStreamConverter>(new Poco::OutputStreamConverter(*out, windows1251, utf8));
-        } catch (const Poco::IOException & e) {
-            connection.session->reset();
-            LOG("Http request failed: " << e.what() << ": " << e.message());
-            throw;
-        }
-	}
-	try{
-		LOG("Sending insert: " << prepared_query);
-		*converter << prepared_query << "\n";
-		converter->flush();
-		out->flush();
-	} catch(std::exception &e) {
+void Statement::checkError() {
+	if(connection.checkResponse){
+		connection.checkResponse = false;
 		std::stringstream error_message;
-		error_message << "Http request failed: " << e.what();
+			bool errorMessageReceived = false;
 		try{
 			response = std::make_unique<Poco::Net::HTTPResponse>();
 			in = &connection.session->receiveResponse(*response);
 			Poco::Net::HTTPResponse::HTTPStatus status = response->getStatus();
 			if (status != Poco::Net::HTTPResponse::HTTP_OK) {
-				error_message << std::endl << "HTTP status code: " << status << std::endl << "Received error:" << std::endl << in->rdbuf() << std::endl;
+				error_message << "HTTP status code: " << status << std::endl << "Received error:" << std::endl << in->rdbuf();
+				errorMessageReceived = true;
 			}
 		} catch(std::exception &e2) {
 			LOG("Receiving response failed: " << e2.what());
-		}	
+		}
+		if(errorMessageReceived){
+			LOG("Response received: " << error_message.str());
+			throw std::runtime_error(error_message.str());
+		}
+	}
+}
+
+void Statement::sleep() {
+	if(connection.sleep){
+		LOG("Waiting for " << SLEEP_SECONDS << "s");
+		std::this_thread::sleep_for (std::chrono::seconds(SLEEP_SECONDS));
+	}
+}
+
+void Statement::processInsert() {
+	if(out == nullptr || !out->good()){
+			checkError();
+		    Poco::Net::HTTPRequest request;
+			composeRequest(request);
+			connection.session->reset();		
+		try {
+			sleep();
+            out = &connection.session->sendRequest(request);
+			converter = std::unique_ptr<Poco::OutputStreamConverter>(new Poco::OutputStreamConverter(*out, windows1251, utf8));
+			connection.sleep = false;
+        } catch (const Poco::IOException & e) {
+            connection.session->reset();
+            LOG("Http request failed: " << e.what() << ": " << e.message());
+			connection.sleep = true;
+            throw;
+        }
+	}
+	try{
+		LOG("Sending insert (" << this << "): " << prepared_query);
+		*converter << prepared_query << "\n";
+		converter->flush();
+		out->flush();
+		connection.checkResponse = true;
+	} catch(std::exception &e) {
+		std::stringstream error_message;
+		error_message << "Http request failed: " << e.what();	
 		connection.session->reset();
 		throw std::runtime_error(error_message.str());
 	}
@@ -158,10 +196,11 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
 	
     if (in && in->peek() != EOF || out){
 		connection.session->reset();
-		out = nullptr;
+		connection.checkResponse = false;
 	}
         
     // Send request to server with finite count of retries.
+	sleep();
     for (int i = 1;; ++i) {
         try {
 			std::string utfString;
@@ -169,12 +208,14 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
             connection.session->sendRequest(request) << utfString;
             response = std::make_unique<Poco::Net::HTTPResponse>();
             in = &connection.session->receiveResponse(*response);
+			connection.sleep = false;
             break;
         } catch (const Poco::IOException & e) {
             connection.session->reset(); // reset keepalived connection
 
             LOG("Http request try=" << i << "/" << connection.retry_count << " failed: " << e.what() << ": " << e.message());
             if (i > connection.retry_count) {
+				connection.sleep = true;
                 throw;
             }
         }

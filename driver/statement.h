@@ -3,6 +3,7 @@
 #include "connection.h"
 #include "result_set.h"
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/WebSocket.h>
 #include <Poco/StreamConverter.h>
 #include <Poco/Windows1251Encoding.h>
 #include <Poco/UTF8Encoding.h>
@@ -95,6 +96,7 @@ private:
 
 	
     std::unique_ptr<Poco::Net::HTTPResponse> response;
+	std::unique_ptr<Poco::Net::HTTPRequest> request;
 
     /// An SQLUINTEGER value that determines
     /// how the string arguments of catalog functions are treated.
@@ -108,5 +110,5 @@ private:
 	Poco::UTF8Encoding utf8;
 	Poco::Windows1251Encoding windows1251;
 	Poco::TextConverter textConverter;
-	std::unique_ptr<Poco::OutputStreamConverter> converter;
+	std::unique_ptr<Poco::Net::WebSocket> webSocket = nullptr;
 };

@@ -146,33 +146,32 @@ void Statement::sleep() {
 }
 
 void Statement::processInsert() {
-	if(out == nullptr || !out->good()){
-			checkError();
-		    Poco::Net::HTTPRequest request;
-			composeRequest(request);
-			connection.session->reset();		
-		try {
-			sleep();
-            out = &connection.session->sendRequest(request);
-			converter = std::unique_ptr<Poco::OutputStreamConverter>(new Poco::OutputStreamConverter(*out, windows1251, utf8));
-			connection.sleep = false;
-        } catch (const Poco::IOException & e) {
-            connection.session->reset();
-            LOG("Http request failed: " << e.what() << ": " << e.message());
-			connection.sleep = true;
-            throw;
-        }
+	if(!webSocket){
+		connection.session->reset();	
+		request = std::unique_ptr<Poco::Net::HTTPRequest>(new Poco::Net::HTTPRequest(Poco::Net::HTTPRequest::HTTP_GET, "/odbc/ws/quik", Poco::Net::HTTPMessage::HTTP_1_1));
+		std::ostringstream user_password_base64;
+		Poco::Base64Encoder base64_encoder(user_password_base64, Poco::BASE64_URL_ENCODING);
+		base64_encoder << connection.user << ":" << connection.password;
+		base64_encoder.close();
+		request->setCredentials("Basic", user_password_base64.str());
+
+		response = std::make_unique<Poco::Net::HTTPResponse>();	
+		webSocket = std::unique_ptr<Poco::Net::WebSocket>(new Poco::Net::WebSocket(*connection.session, *request, *response));
+		sleep();
 	}
 	try{
 		LOG("Sending insert (" << this << "): " << prepared_query);
-		*converter << prepared_query << "\n";
-		converter->flush();
-		out->flush();
-		connection.checkResponse = true;
+		std::string utfString;
+		textConverter.convert(prepared_query, utfString);
+		webSocket->sendFrame(utfString.data(), (int) utfString.size() , Poco::Net::WebSocket::FRAME_TEXT);
+		char buffer[1024] = {};
+		int flags;
+		int n = webSocket->receiveFrame(buffer, sizeof(buffer), flags);
 	} catch(std::exception &e) {
 		std::stringstream error_message;
-		error_message << "Http request failed: " << e.what();	
+		error_message << "WebSocket failed: " << e.what();	
 		connection.session->reset();
+		connection.sleep = true;
 		throw std::runtime_error(error_message.str());
 	}
 }

@@ -19,7 +19,8 @@ Statement::Statement(Connection & conn_) : connection(conn_), metadata_id(conn_.
 Statement::~Statement(){
 	if(out){
 		try{
-			connection.session->reset();
+            response = std::make_unique<Poco::Net::HTTPResponse>();
+            in = &connection.session->receiveResponse(*response);
 			connection.checkResponse = false;
 		} catch(...){
 			

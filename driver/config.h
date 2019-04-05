@@ -33,7 +33,7 @@ struct ConnInfo {
 	MYTCHAR tables[MEDIUM_REGISTRY_LEN];
 	MYTCHAR expand_tags[SMALL_REGISTRY_LEN];
 	MYTCHAR meta_columns[SMALL_REGISTRY_LEN];
-	
+    MYTCHAR test[MEDIUM_REGISTRY_LEN];
 
     signed char disallow_premature = -1;
     signed char allow_keyset = -1;

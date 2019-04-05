@@ -257,6 +257,9 @@ void Connection::loadConfiguration() {
 	if(tables.empty()){
 		tables = stringFromMYTCHAR(ci.tables);
 	}
+    if (test.empty()) {
+        test = stringFromMYTCHAR(ci.test);
+    }
 	{
 		auto str = stringFromMYTCHAR(ci.expand_tags);
 		expand_tags = (str == "1" || str == "Yes" || str == "yes");

@@ -29,6 +29,7 @@ ConnInfo::ConnInfo() {
 	ZERO_FIELD(tables);
 	ZERO_FIELD(expand_tags);
 	ZERO_FIELD(meta_columns)
+    ZERO_FIELD(test)
 
 #undef ZERO_FIELD
 }
@@ -55,6 +56,7 @@ void getDSNinfo(ConnInfo * ci, bool overwrite) {
 	GET_CONFIG(tables, INI_TABLES, "");
 	GET_CONFIG(expand_tags, INI_EXPANDTAGS, "");
 	GET_CONFIG(meta_columns, INI_METACOLUMNS, "");
+    GET_CONFIG(test, INI_TEST, "");
 
 #undef GET_CONFIG
 }

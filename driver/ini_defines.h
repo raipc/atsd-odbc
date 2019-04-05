@@ -23,6 +23,7 @@
 #define INI_TABLES TEXT("Tables")
 #define INI_EXPANDTAGS TEXT("ExpandTags")
 #define INI_METACOLUMNS TEXT("MetaColumns")
+#define INI_TEST TEXT("Test")
 
 #ifndef WIN32
 #    define ODBC_INI TEXT(".odbc.ini")

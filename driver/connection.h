@@ -34,6 +34,7 @@ struct Connection {
 	bool meta_columns = false;
 	bool checkResponse = false;
 	bool sleep = false;
+    std::string test;
 
     std::unique_ptr<Poco::Net::HTTPClientSession> session;
     DiagnosticRecord diagnostic_record;

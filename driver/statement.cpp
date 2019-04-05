@@ -148,7 +148,14 @@ void Statement::processInsert() {
     bool newSocket = false;
 	if(!webSocket){
         LOG("Creating new websocket");
-		request = std::unique_ptr<Poco::Net::HTTPRequest>(new Poco::Net::HTTPRequest(Poco::Net::HTTPRequest::HTTP_GET, "/odbc/ws/quik", Poco::Net::HTTPMessage::HTTP_1_1));
+        std::stringstream path;
+        path << "/odbc/ws/quik";
+        if (!connection.test.empty()) {
+            path << "?test=" << connection.test;
+        }
+        request = std::unique_ptr<Poco::Net::HTTPRequest>(
+                new Poco::Net::HTTPRequest(Poco::Net::HTTPRequest::HTTP_GET, path.str(),
+                                           Poco::Net::HTTPMessage::HTTP_1_1));
 		std::ostringstream user_password_base64;
 		Poco::Base64Encoder base64_encoder(user_password_base64, Poco::BASE64_URL_ENCODING);
 		base64_encoder << connection.user << ":" << connection.password;

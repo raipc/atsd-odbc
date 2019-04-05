@@ -12,6 +12,7 @@
 #include <sstream>
 
 #define SLEEP_SECONDS 15
+#define BATCH_SIZE 100
 
 /// Information where and how to add values when reading.
 struct Binding {
@@ -69,8 +70,8 @@ public:
 	void composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode = false);
 	
 	void processInsert();
-	
-	void checkError();
+
+    void checkError(bool first);
 	
 	void sleep();
 public:

@@ -19,7 +19,9 @@ Statement::Statement(Connection & conn_) : connection(conn_), metadata_id(conn_.
 Statement::~Statement(){
 	if(out){
 		try{
-			connection.session->reset();
+            if (webSocket) {
+                webSocket->close();
+            }
 			connection.checkResponse = false;
 		} catch(...){
 			
@@ -115,26 +117,23 @@ void Statement::composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode) 
 
 }
 
-void Statement::checkError() {
-	if(connection.checkResponse){
-		connection.checkResponse = false;
-		std::stringstream error_message;
-			bool errorMessageReceived = false;
-		try{
-			response = std::make_unique<Poco::Net::HTTPResponse>();
-			in = &connection.session->receiveResponse(*response);
-			Poco::Net::HTTPResponse::HTTPStatus status = response->getStatus();
-			if (status != Poco::Net::HTTPResponse::HTTP_OK) {
-				error_message << "HTTP status code: " << status << std::endl << "Received error:" << std::endl << in->rdbuf();
-				errorMessageReceived = true;
+void Statement::checkError(bool first) {
+    std::string error;
+    while (first || webSocket->available() > 0) {
+        first = false;
+        char buffer[1024] = {};
+        int flags;
+        int n = webSocket->receiveFrame(buffer, sizeof(buffer), flags);
+        if (n > 1) { // error message received
+            std::string e(buffer, n);
+            LOG("Error received: " << e);
+            if (error.empty()) { // show only first error
+                error = e;
 			}
-		} catch(std::exception &e2) {
-			LOG("Receiving response failed: " << e2.what());
 		}
-		if(errorMessageReceived){
-			LOG("Response received: " << error_message.str());
-			throw std::runtime_error(error_message.str());
-		}
+    }
+    if (!error.empty()) {
+        throw std::runtime_error(error);
 	}
 }
 
@@ -146,8 +145,9 @@ void Statement::sleep() {
 }
 
 void Statement::processInsert() {
+    bool newSocket = false;
 	if(!webSocket){
-		connection.session->reset();	
+        LOG("Creating new websocket");
 		request = std::unique_ptr<Poco::Net::HTTPRequest>(new Poco::Net::HTTPRequest(Poco::Net::HTTPRequest::HTTP_GET, "/odbc/ws/quik", Poco::Net::HTTPMessage::HTTP_1_1));
 		std::ostringstream user_password_base64;
 		Poco::Base64Encoder base64_encoder(user_password_base64, Poco::BASE64_URL_ENCODING);
@@ -155,25 +155,36 @@ void Statement::processInsert() {
 		base64_encoder.close();
 		request->setCredentials("Basic", user_password_base64.str());
 
-		response = std::make_unique<Poco::Net::HTTPResponse>();	
-		webSocket = std::unique_ptr<Poco::Net::WebSocket>(new Poco::Net::WebSocket(*connection.session, *request, *response));
-		sleep();
+		response = std::make_unique<Poco::Net::HTTPResponse>();
+        try {
+            sleep();
+            connection.init();
+            webSocket = std::unique_ptr<Poco::Net::WebSocket>(
+                    new Poco::Net::WebSocket(*connection.session, *request, *response));
+            connection.sleep = false;
+            newSocket = true;
+            LOG("New websocket created");
+        } catch (const Poco::Exception &e) {
+            LOG("Creating websocket failed: " << e.what() << ": " << e.message());
+            connection.sleep = true;
+            throw e;
+        }
 	}
 	try{
+        sleep();
 		LOG("Sending insert (" << this << "): " << prepared_query);
 		std::string utfString;
 		textConverter.convert(prepared_query, utfString);
 		webSocket->sendFrame(utfString.data(), (int) utfString.size() , Poco::Net::WebSocket::FRAME_TEXT);
-		char buffer[1024] = {};
-		int flags;
-		int n = webSocket->receiveFrame(buffer, sizeof(buffer), flags);
-	} catch(std::exception &e) {
+        connection.sleep = false;
+    } catch (const Poco::Exception &e) {
 		std::stringstream error_message;
-		error_message << "WebSocket failed: " << e.what();	
+        error_message << "WebSocket failed: " << e.what() << ": " << e.message();
 		connection.session->reset();
 		connection.sleep = true;
 		throw std::runtime_error(error_message.str());
 	}
+    checkError(newSocket);
 }
 
 void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {

@@ -17,17 +17,10 @@ Statement::Statement(Connection & conn_) : connection(conn_), metadata_id(conn_.
 }
 
 Statement::~Statement(){
-	if(out){
-		try{
-            if (webSocket) {
-                webSocket->close();
-            }
-			connection.checkResponse = false;
-		} catch(...){
-			
-		}
-	}
-	LOG("Statement closed: " << this);
+    if (webSocketConnection) {
+        webSocketConnection->close();
+    }
+    LOG("Statement destroyed: " << this);
 }
 
 bool Statement::getScanEscapeSequences() const {
@@ -117,25 +110,6 @@ void Statement::composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode) 
 
 }
 
-void Statement::checkError(bool first) {
-    std::string error;
-    while (first || webSocket->available() > 0) {
-        first = false;
-        char buffer[1024] = {};
-        int flags;
-        int n = webSocket->receiveFrame(buffer, sizeof(buffer), flags);
-        if (n > 1) { // error message received
-            std::string e(buffer, n);
-            LOG("Error received: " << e);
-            if (error.empty()) { // show only first error
-                error = e;
-			}
-		}
-    }
-    if (!error.empty()) {
-        throw std::runtime_error(error);
-	}
-}
 
 void Statement::sleep() {
 	if(connection.sleep){
@@ -144,82 +118,51 @@ void Statement::sleep() {
 	}
 }
 
-void Statement::processInsert() {
-    bool newSocket = false;
-	if(!webSocket){
-        LOG("Creating new websocket");
-        std::stringstream path;
-        path << "/odbc/ws/quik";
-        if (!connection.test.empty()) {
-            path << "?test=" << connection.test;
-        }
-        request = std::unique_ptr<Poco::Net::HTTPRequest>(
-                new Poco::Net::HTTPRequest(Poco::Net::HTTPRequest::HTTP_GET, path.str(),
-                                           Poco::Net::HTTPMessage::HTTP_1_1));
-		std::ostringstream user_password_base64;
-		Poco::Base64Encoder base64_encoder(user_password_base64, Poco::BASE64_URL_ENCODING);
-		base64_encoder << connection.user << ":" << connection.password;
-		base64_encoder.close();
-		request->setCredentials("Basic", user_password_base64.str());
+void Statement::obtainWebSocketConnection() {
+    if (!webSocketConnection || webSocketConnection->isClosed()) {
+        webSocketConnection = std::unique_ptr<WebSocketConnection>(connection.createWebSocket());
+    }
+}
 
-		response = std::make_unique<Poco::Net::HTTPResponse>();
+void Statement::execute() {
+    for (int i = 1;; ++i) {
         try {
             sleep();
-            connection.init();
-            webSocket = std::unique_ptr<Poco::Net::WebSocket>(
-                    new Poco::Net::WebSocket(*connection.session, *request, *response));
+            obtainWebSocketConnection();
+            std::string utfString;
+            textConverter.convert(prepared_query, utfString);
+            webSocketConnection->send(utfString);
+            webSocketConnection->checkError();
             connection.sleep = false;
-            newSocket = true;
-            LOG("New websocket created");
+            break;
         } catch (const Poco::Exception &e) {
-            LOG("Creating websocket failed: " << e.what() << ": " << e.message());
             connection.sleep = true;
-            throw e;
+            webSocketConnection->close();
+            std::stringstream error_message;
+            error_message << "WebSocket failed: " << e.what() << ": " << e.message();
+            LOG("try=" << i << " " << error_message.str());
+            if (i > connection.retry_count) {
+                throw std::runtime_error(error_message.str());
+            }
+        } catch (const std::exception &e) {
+            connection.sleep = true;
+            throw;
         }
-	}
-	try{
-        sleep();
-		LOG("Sending insert (" << this << "): " << prepared_query);
-		std::string utfString;
-		textConverter.convert(prepared_query, utfString);
-		webSocket->sendFrame(utfString.data(), (int) utfString.size() , Poco::Net::WebSocket::FRAME_TEXT);
-        connection.sleep = false;
-    } catch (const Poco::Exception &e) {
-		std::stringstream error_message;
-        error_message << "WebSocket failed: " << e.what() << ": " << e.message();
-		connection.session->reset();
-		connection.sleep = true;
-		throw std::runtime_error(error_message.str());
-	}
-    checkError(newSocket);
+    }
 }
 
 void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
-	std::string insert_keyword = "INSERT";
-	std::string update_keyword = "UPDATE";
-	std::string delete_keyword = "DELETE";
-	bool insert = !meta_mode && (
-	!strnicmp(insert_keyword.c_str() , prepared_query.c_str(), 6) 
-	|| !strnicmp(update_keyword.c_str() , prepared_query.c_str(), 6)
-	|| !strnicmp(delete_keyword.c_str() , prepared_query.c_str(), 6)
-	);
-	if(insert) {
-		processInsert();
-		return;
-	}
-	
     Poco::Net::HTTPRequest request;
 	composeRequest(request, meta_mode);
-	
-    if (in && in->peek() != EOF || out){
+
+    if (in && in->peek() != EOF) {
 		connection.session->reset();
-		connection.checkResponse = false;
 	}
         
     // Send request to server with finite count of retries.
-	sleep();
     for (int i = 1;; ++i) {
         try {
+            sleep();
 			std::string utfString;
 			textConverter.convert(prepared_query, utfString);
             connection.session->sendRequest(request) << utfString;
@@ -227,12 +170,11 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
             in = &connection.session->receiveResponse(*response);
 			connection.sleep = false;
             break;
-        } catch (const Poco::IOException & e) {
+        } catch (const Poco::Exception &e) {
             connection.session->reset(); // reset keepalived connection
-
+            connection.sleep = true;
             LOG("Http request try=" << i << "/" << connection.retry_count << " failed: " << e.what() << ": " << e.message());
             if (i > connection.retry_count) {
-				connection.sleep = true;
                 throw;
             }
         }

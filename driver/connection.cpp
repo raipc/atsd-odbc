@@ -2,6 +2,8 @@
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/NumberParser.h> // TODO: switch to std
 #include <Poco/URI.h>
+#include <Poco/Base64Encoder.h>
+#include <sstream>
 #include "config.h"
 #include "string_ref.h"
 #include "utils.h"
@@ -86,7 +88,7 @@ void Connection::init() {
     LOG("Creating session with " << proto << "://" << server << ":" << port);
 
 #if USE_SSL
-    bool is_ssl = proto == "https";
+    is_ssl = proto == "https";
 
     std::call_once(ssl_init_once, SSLInit, ssl_strict, privateKeyFile, certificateFile, caLocation);
 #endif
@@ -124,6 +126,30 @@ void Connection::init(const std::string & dsn_,
         database = database_;
 
     init();
+}
+
+WebSocketConnection *Connection::createWebSocket() {
+    Poco::Net::HTTPClientSession *session =
+#if USE_SSL
+            is_ssl ? new Poco::Net::HTTPSClientSession(server, port) :
+#endif
+            new Poco::Net::HTTPClientSession(server, port);
+
+    std::stringstream path;
+    path << "/odbc/ws/quik";
+    if (!test.empty()) {
+        path << "?test=" << test;
+    }
+    Poco::Net::HTTPRequest *request = new Poco::Net::HTTPRequest(Poco::Net::HTTPRequest::HTTP_GET, path.str(),
+                                                                 Poco::Net::HTTPMessage::HTTP_1_1);
+    std::ostringstream user_password_base64;
+    Poco::Base64Encoder base64_encoder(user_password_base64, Poco::BASE64_URL_ENCODING);
+    base64_encoder << user << ":" << password;
+    base64_encoder.close();
+    request->setCredentials("Basic", user_password_base64.str());
+    LOG("Open new websocket connection: " << session->getHost() << request->getURI());
+
+    return new WebSocketConnection(request, session);
 }
 
 void Connection::init(const std::string & connection_string) {

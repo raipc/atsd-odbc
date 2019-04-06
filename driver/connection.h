@@ -6,7 +6,7 @@
 
 #include "diagnostics.h"
 #include "environment.h"
-//namespace Poco { namespace Net { class HTTPClientSession; } }
+#include "web_socket_connection.h"
 
 struct Connection {
     Environment & environment;
@@ -24,6 +24,7 @@ struct Connection {
     int connection_timeout = 0;
     int32_t stringmaxlength = 0;
     bool ssl_strict = false;
+    bool is_ssl = false;
 
     std::string privateKeyFile;
     std::string certificateFile;
@@ -32,13 +33,12 @@ struct Connection {
 	std::string tables;
 	bool expand_tags = false;
 	bool meta_columns = false;
-	bool checkResponse = false;
 	bool sleep = false;
     std::string test;
 
     std::unique_ptr<Poco::Net::HTTPClientSession> session;
     DiagnosticRecord diagnostic_record;
-    int retry_count = 3;
+    int retry_count = 60;
 
     Connection(Environment & env_);
 
@@ -60,6 +60,8 @@ struct Connection {
         const std::string & database_);
 
     void init(const std::string & connection_string);
+
+    WebSocketConnection *createWebSocket();
 
 private:
     /// Load uninitialized fields from odbc.ini

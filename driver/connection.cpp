@@ -1,5 +1,6 @@
 #include "connection.h"
 #include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/WebSocket.h>
 #include <Poco/NumberParser.h> // TODO: switch to std
 #include <Poco/URI.h>
 #include <Poco/Base64Encoder.h>
@@ -147,8 +148,6 @@ WebSocketConnection *Connection::createWebSocket() {
     base64_encoder << user << ":" << password;
     base64_encoder.close();
     request->setCredentials("Basic", user_password_base64.str());
-    LOG("Open new websocket connection: " << session->getHost() << request->getURI());
-
     return new WebSocketConnection(request, session);
 }
 

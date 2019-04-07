@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <mutex>
 
 extern bool log_enabled;
 
@@ -24,12 +25,16 @@ extern bool log_enabled;
 
 extern std::ofstream log_stream;
 extern std::string log_file;
+extern std::mutex log_lock;
 
 std::ostream & log_prefix(std::ofstream & stream);
 
-#define LOG(message)                                                              \
-    do {                                                                          \
-        if (log_enabled)                                                          \
-            log_prefix(log_stream);                                               \
-        log_stream << __FILE__ << ":" << __LINE__ << " " << message << std::endl; \
-    } while (false)
+#define LOG(message)                                                                    \
+    if (log_enabled) {                                                                  \
+        log_lock.lock();                                                                \
+        try {                                                                           \
+            log_prefix(log_stream);                                                     \
+            log_stream << __FILE__ << ":" << __LINE__ << " " << message << std::endl;   \
+        } catch(...){}                                                                  \
+        log_lock.unlock();                                                              \
+    }

@@ -4,10 +4,6 @@
 WebSocketConnection::WebSocketConnection(Poco::Net::HTTPRequest *request_, Poco::Net::HTTPClientSession *session_) :
         response(), request(request_), session(session_), webSocket(*session, *request, response) {}
 
-WebSocketConnection::~WebSocketConnection() {
-    LOG("WebSocketConnection destroyed");
-}
-
 bool WebSocketConnection::isClosed() const {
     return closed;
 }

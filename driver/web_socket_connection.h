@@ -11,8 +11,6 @@ class WebSocketConnection {
 public:
     WebSocketConnection(Poco::Net::HTTPRequest *request, Poco::Net::HTTPClientSession *session);
 
-    ~WebSocketConnection();
-
     void send(std::string query);
 
     void checkError();

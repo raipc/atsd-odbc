@@ -10,8 +10,7 @@
 #include <memory>
 #include <sstream>
 
-#define SLEEP_SECONDS 15
-#define BATCH_SIZE 100
+#define SLEEP_SECONDS 10
 
 /// Information where and how to add values when reading.
 struct Binding {

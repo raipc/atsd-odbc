@@ -13,14 +13,12 @@ Statement::Statement(Connection & conn_) : connection(conn_), metadata_id(conn_.
     apd.reset(new DescriptorClass);
     ird.reset(new DescriptorClass);
     ipd.reset(new DescriptorClass);
-	LOG("Statement created: " << this << " connection: " << &conn_);
 }
 
 Statement::~Statement(){
     if (webSocketConnection) {
         webSocketConnection->close();
     }
-    LOG("Statement destroyed: " << this);
 }
 
 bool Statement::getScanEscapeSequences() const {
@@ -125,6 +123,7 @@ void Statement::obtainWebSocketConnection() {
 }
 
 void Statement::execute() {
+    LOG("Statement: " << this << ":" << (&connection) << " query: " << prepared_query);
     for (int i = 1;; ++i) {
         try {
             sleep();
@@ -137,7 +136,9 @@ void Statement::execute() {
             break;
         } catch (const Poco::Exception &e) {
             connection.sleep = true;
-            webSocketConnection->close();
+            if (webSocketConnection) {
+                webSocketConnection->close();
+            }
             std::stringstream error_message;
             error_message << "WebSocket failed: " << e.what() << ": " << e.message();
             LOG("try=" << i << " " << error_message.str());

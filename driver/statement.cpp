@@ -135,7 +135,7 @@ void Statement::execute() {
             connection.sleep = false;
             break;
         } catch (const Poco::Exception &e) {
-            connection.sleep = true;
+            connection.sleep = i > SLEEP_AFTER_TRIES;
             if (webSocketConnection) {
                 webSocketConnection->close();
             }
@@ -173,7 +173,7 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
             break;
         } catch (const Poco::Exception &e) {
             connection.session->reset(); // reset keepalived connection
-            connection.sleep = true;
+            connection.sleep = i > SLEEP_AFTER_TRIES;
             LOG("Http request try=" << i << "/" << connection.retry_count << " failed: " << e.what() << ": " << e.message());
             if (i > connection.retry_count) {
                 throw;

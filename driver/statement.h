@@ -11,6 +11,7 @@
 #include <sstream>
 
 #define SLEEP_SECONDS 10
+#define SLEEP_AFTER_TRIES 3
 
 /// Information where and how to add values when reading.
 struct Binding {

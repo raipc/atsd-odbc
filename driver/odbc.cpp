@@ -99,9 +99,7 @@ RETCODE SQL_API SQLExecute(HSTMT statement_handle)
     LOG(__FUNCTION__);
 
     return doWith<Statement>(statement_handle, [&](Statement & statement) {
-statement.
-
-execute();
+        statement.execute();
         return SQL_SUCCESS;
     });
 }
@@ -109,7 +107,7 @@ execute();
 
 RETCODE SQL_API FUNCTION_MAYBE_W(SQLExecDirect)(HSTMT statement_handle, SQLTCHAR * statement_text, SQLINTEGER statement_text_size)
 {
-    //LOG(__FUNCTION__);
+    LOG(__FUNCTION__);
 
     return doWith<Statement>(statement_handle, [&](Statement & statement) {
         const std::string & query = stringFromSQLSymbols(statement_text, statement_text_size);

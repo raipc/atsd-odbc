@@ -8,6 +8,7 @@
 #include "config.h"
 #include "string_ref.h"
 #include "utils.h"
+#include "win/version.h"
 
 //#if __has_include("config_cmake.h") // requre c++17
 
@@ -149,6 +150,75 @@ WebSocketConnection *Connection::createWebSocket() {
     base64_encoder.close();
     request->setCredentials("Basic", user_password_base64.str());
     return new WebSocketConnection(request, session);
+}
+
+HttpConnection *Connection::createHttpConnection(){
+    Poco::Net::HTTPClientSession *session =
+#if USE_SSL
+            is_ssl ? new Poco::Net::HTTPSClientSession(server, port) :
+#endif
+            new Poco::Net::HTTPClientSession(server, port);
+    Poco::Net::HTTPRequest *request = new Poco::Net::HTTPRequest();
+    composeRequest(*request);
+    return new HttpConnection(request, session);
+}
+
+void Connection::composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode) {
+    std::ostringstream user_password_base64;
+    Poco::Base64Encoder base64_encoder(user_password_base64, Poco::BASE64_URL_ENCODING);
+    base64_encoder << user << ":" << password;
+    base64_encoder.close();
+
+    request.setMethod(Poco::Net::HTTPRequest::HTTP_POST);
+    request.setVersion(Poco::Net::HTTPRequest::HTTP_1_1);
+    request.setKeepAlive(true);
+    request.setChunkedTransferEncoding(true);
+    request.setCredentials("Basic", user_password_base64.str());
+    Poco::URI uri(url);
+    uri.addQueryParameter("version", std::string{VERSION_STRING});
+    std::ostringstream ss;
+    ss << std::this_thread::get_id();
+    uri.addQueryParameter("thread", ss.str());
+    if (!test.empty()) {
+        uri.addQueryParameter("test", test);
+    }
+    if(meta_mode){
+        if(!tables.empty()){
+            std::string encoded;
+            Poco::URI::encode(tables, "", encoded);
+            uri.addQueryParameter("tables",encoded);
+        }
+
+        if(expand_tags)
+            uri.addQueryParameter("expandTags", "true");
+        if(meta_columns)
+            uri.addQueryParameter("metaColumns", "true");
+    }
+    std::string contentType = "text/plain; charset=utf-8";
+    request.setContentType(contentType);
+#if !defined(UNICODE)
+    {
+        if(environment.code_page > 0){
+            uri.addQueryParameter("codePage", std::to_string(environment.code_page));
+        }
+        std::string encoded;
+        Poco::URI::encode(environment.locale, "", encoded);
+        uri.addQueryParameter("locale", encoded);
+    }
+#endif
+
+    std::string path = meta_mode ? meta_path : this->path;
+    // quick client start
+    path += "/quick";
+    // quick client end
+    request.setURI(path + "?" + uri.getQuery()); /// TODO escaping
+    request.set("User-Agent", "atsd-odbc/" VERSION_STRING " (" CMAKE_SYSTEM ")"
+#if defined(UNICODE)
+    " UNICODE"
+#endif
+    );
+    LOG(request.getMethod() << " " << server <<  request.getURI() << " Content Type=" << request.getContentType());
+
 }
 
 void Connection::init(const std::string & connection_string) {

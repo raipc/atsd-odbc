@@ -68,9 +68,7 @@ public:
 
     void execute();
 
-	void composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode = false);
-
-    void obtainWebSocketConnection();
+    void obtainLongRunningConnection(const std::string &query);
 
 	void sleep();
 public:
@@ -109,5 +107,5 @@ private:
 	Poco::UTF8Encoding utf8;
 	Poco::Windows1251Encoding windows1251;
 	Poco::TextConverter textConverter;
-    std::unique_ptr <WebSocketConnection> webSocketConnection = nullptr;
+    std::unique_ptr <LongRunningConnection> longRunningConnection = nullptr;
 };

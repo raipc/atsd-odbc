@@ -16,8 +16,8 @@ Statement::Statement(Connection & conn_) : connection(conn_), metadata_id(conn_.
 }
 
 Statement::~Statement(){
-    if (webSocketConnection) {
-        webSocketConnection->close();
+    if (longRunningConnection) {
+        longRunningConnection->close();
     }
 }
 
@@ -53,61 +53,6 @@ bool Statement::isPrepared() const {
     return prepared;
 }
 
-void Statement::composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode) {
-	std::ostringstream user_password_base64;
-    Poco::Base64Encoder base64_encoder(user_password_base64, Poco::BASE64_URL_ENCODING);
-    base64_encoder << connection.user << ":" << connection.password;
-    base64_encoder.close();
-
-    request.setMethod(Poco::Net::HTTPRequest::HTTP_POST);
-    request.setVersion(Poco::Net::HTTPRequest::HTTP_1_1);
-    request.setKeepAlive(true);
-    request.setChunkedTransferEncoding(true);
-    request.setCredentials("Basic", user_password_base64.str());
-    Poco::URI uri(connection.url);
-	uri.addQueryParameter("version", std::string{VERSION_STRING});
-	std::ostringstream ss;
-    ss << std::this_thread::get_id();
-	uri.addQueryParameter("thread", ss.str());
-	if(meta_mode){
-		if(!connection.tables.empty()){
-			std::string encoded;
-			Poco::URI::encode(connection.tables, "", encoded);
-			uri.addQueryParameter("tables",encoded);
-		}
-			
-		if(connection.expand_tags)
-			uri.addQueryParameter("expandTags", "true");
-		if(connection.meta_columns)
-			uri.addQueryParameter("metaColumns", "true");
-	}
-	std::string contentType = "text/plain; charset=utf-8";
-	request.setContentType(contentType);
-	#if !defined(UNICODE)
-	{
-		if(connection.environment.code_page > 0){
-			uri.addQueryParameter("codePage", std::to_string(connection.environment.code_page));
-		}
-	    std::string encoded;
-		Poco::URI::encode(connection.environment.locale, "", encoded);
-		uri.addQueryParameter("locale", encoded);
- 	}
-	#endif
-    
-	std::string path = meta_mode ? connection.meta_path : connection.path;
-	// quick client start
-	path += "/quick";
-	// quick client end
-    request.setURI(path + "?" + uri.getQuery()); /// TODO escaping
-    request.set("User-Agent", "atsd-odbc/" VERSION_STRING " (" CMAKE_SYSTEM ")"
-#if defined(UNICODE)
-        " UNICODE"
-#endif
-    );
-	LOG(request.getMethod() << " " << connection.session->getHost() << request.getURI() << " Content Type=" << request.getContentType() <<  " body=" << prepared_query);
-
-}
-
 
 void Statement::sleep() {
 	if(connection.sleep){
@@ -116,9 +61,14 @@ void Statement::sleep() {
 	}
 }
 
-void Statement::obtainWebSocketConnection() {
-    if (!webSocketConnection || webSocketConnection->isClosed()) {
-        webSocketConnection = std::unique_ptr<WebSocketConnection>(connection.createWebSocket());
+void Statement::obtainLongRunningConnection(const std::string &query) {
+    if (!longRunningConnection || longRunningConnection->isClosed()) {
+        bool txAllTable = query.find("quik_tx_all") != std::string::npos;
+        if(txAllTable){
+            longRunningConnection.reset(connection.createHttpConnection());
+        } else {
+            longRunningConnection.reset(connection.createWebSocket());
+        }
     }
 }
 
@@ -127,25 +77,26 @@ void Statement::execute() {
     for (int i = 1;; ++i) {
         try {
             sleep();
-            obtainWebSocketConnection();
+            obtainLongRunningConnection(prepared_query);
             std::string utfString;
             textConverter.convert(prepared_query, utfString);
-            webSocketConnection->send(utfString);
-            webSocketConnection->checkError();
+            longRunningConnection->send(utfString);
+            longRunningConnection->checkError();
             connection.sleep = false;
             break;
         } catch (const Poco::Exception &e) {
             connection.sleep = i > SLEEP_AFTER_TRIES;
-            if (webSocketConnection) {
-                webSocketConnection->close();
+            if (longRunningConnection) {
+                longRunningConnection->close();
             }
             std::stringstream error_message;
-            error_message << "WebSocket failed: " << e.what() << ": " << e.message();
+            error_message << "Long running connection failed: " << e.what() << ": " << e.message();
             LOG("try=" << i << " " << error_message.str());
             if (i > connection.retry_count) {
                 throw std::runtime_error(error_message.str());
             }
         } catch (const std::exception &e) {
+            LOG("Error: " << e.what());
             connection.sleep = true;
             throw;
         }
@@ -154,7 +105,7 @@ void Statement::execute() {
 
 void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
     Poco::Net::HTTPRequest request;
-	composeRequest(request, meta_mode);
+	connection.composeRequest(request, meta_mode);
 
     if (in && in->peek() != EOF) {
 		connection.session->reset();
@@ -228,4 +179,8 @@ void Statement::reset() {
     apd.reset(new DescriptorClass);
     ird.reset(new DescriptorClass);
     ipd.reset(new DescriptorClass);
+    if(longRunningConnection){
+        longRunningConnection->close();
+        longRunningConnection->checkError();
+    }
 }

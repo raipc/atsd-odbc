@@ -7,6 +7,7 @@
 #include "diagnostics.h"
 #include "environment.h"
 #include "web_socket_connection.h"
+#include "http_connection.h"
 
 struct Connection {
     Environment & environment;
@@ -62,6 +63,10 @@ struct Connection {
     void init(const std::string & connection_string);
 
     WebSocketConnection *createWebSocket();
+
+    HttpConnection *createHttpConnection();
+
+    void composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode = false);
 
 private:
     /// Load uninitialized fields from odbc.ini

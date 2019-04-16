@@ -4,13 +4,12 @@
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPRequest.h>
-#include <Poco/Net/WebSocket.h>
 #include <memory>
 #include <string>
 
-class WebSocketConnection : public LongRunningConnection {
+class HttpConnection : public LongRunningConnection {
 public:
-    WebSocketConnection(Poco::Net::HTTPRequest *request, Poco::Net::HTTPClientSession *session);
+    HttpConnection(Poco::Net::HTTPRequest *request, Poco::Net::HTTPClientSession *session);
 
     virtual void send(std::string query);
 
@@ -19,12 +18,14 @@ public:
     virtual void close();
 
     virtual bool isClosed() const;
-
 private:
     Poco::Net::HTTPResponse response;
     std::unique_ptr <Poco::Net::HTTPRequest> request;
     std::unique_ptr <Poco::Net::HTTPClientSession> session;
-    Poco::Net::WebSocket webSocket;
     bool closed = false;
-    int queryCount = 0;
+    std::ostream * out = nullptr;
+    std::istream * in = nullptr;
+    std::string error;
+    bool errorReceived = false;
 };
+

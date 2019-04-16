@@ -175,6 +175,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\driver\attr.cpp" />
     <ClCompile Include="..\..\driver\config.cpp" />
+    <ClCompile Include="..\..\driver\long_running_connection.h" />
     <ClCompile Include="..\..\driver\connection.cpp" />
     <ClCompile Include="..\..\driver\diagnostics.cpp" />
     <ClCompile Include="..\..\driver\environment.cpp" />
@@ -188,6 +189,7 @@
     <ClCompile Include="..\..\driver\read_helpers.cpp" />
     <ClCompile Include="..\..\driver\statement.cpp" />
     <ClCompile Include="..\..\driver\web_socket_connection.cpp" />
+    <ClCompile Include="..\..\driver\http_connection.cpp" />
     <ClCompile Include="..\..\driver\type_parser.cpp" />
     <ClCompile Include="..\..\driver\win\dllmain.cpp" />
     <ClCompile Include="..\..\driver\win\setup.cpp" />

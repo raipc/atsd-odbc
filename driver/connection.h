@@ -62,7 +62,7 @@ struct Connection {
 
     void init(const std::string & connection_string);
 
-    WebSocketConnection *createWebSocket();
+    WebSocketConnection *createWebSocket(bool validateOnly = false);
 
     HttpConnection *createHttpConnection();
 

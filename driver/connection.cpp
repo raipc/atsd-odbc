@@ -130,7 +130,7 @@ void Connection::init(const std::string & dsn_,
     init();
 }
 
-WebSocketConnection *Connection::createWebSocket() {
+WebSocketConnection *Connection::createWebSocket(bool validateOnly) {
     Poco::Net::HTTPClientSession *session =
 #if USE_SSL
             is_ssl ? new Poco::Net::HTTPSClientSession(server, port) :
@@ -139,9 +139,11 @@ WebSocketConnection *Connection::createWebSocket() {
 
     std::stringstream path;
     path << "/odbc/ws/quik";
-    if (!test.empty()) {
+    if(validateOnly){
+		path << "?test=parse";
+	} else if (!test.empty()) {
         path << "?test=" << test;
-    }
+    } 
     Poco::Net::HTTPRequest *request = new Poco::Net::HTTPRequest(Poco::Net::HTTPRequest::HTTP_GET, path.str(),
                                                                  Poco::Net::HTTPMessage::HTTP_1_1);
     std::ostringstream user_password_base64;

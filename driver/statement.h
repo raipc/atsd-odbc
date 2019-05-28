@@ -71,6 +71,9 @@ public:
     void obtainLongRunningConnection(const std::string &query);
 
 	void sleep();
+	
+	void validate(const std::string &query);
+	
 public:
     Connection & connection;
 
@@ -108,4 +111,5 @@ private:
 	Poco::Windows1251Encoding windows1251;
 	Poco::TextConverter textConverter;
     std::unique_ptr <LongRunningConnection> longRunningConnection = nullptr;
+	bool validated = false;
 };

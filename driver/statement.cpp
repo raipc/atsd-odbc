@@ -77,9 +77,13 @@ void Statement::execute() {
     for (int i = 1;; ++i) {
         try {
             sleep();
-            obtainLongRunningConnection(prepared_query);
-            std::string utfString;
+			std::string utfString;
             textConverter.convert(prepared_query, utfString);
+			if(!validated){
+				validate(utfString);
+				validated = true;
+			}
+            obtainLongRunningConnection(prepared_query);
             longRunningConnection->send(utfString);
             longRunningConnection->checkError();
             connection.sleep = false;
@@ -90,7 +94,7 @@ void Statement::execute() {
                 longRunningConnection->close();
             }
             std::stringstream error_message;
-            error_message << "Long running connection failed: " << e.what() << ": " << e.message();
+            error_message << "Long running connection failed: " << e.what() << ": " << e.message(); 
             LOG("try=" << i << " " << error_message.str());
             if (i > connection.retry_count) {
                 throw std::runtime_error(error_message.str());
@@ -101,6 +105,23 @@ void Statement::execute() {
             throw;
         }
     }
+}
+
+void Statement::validate(const std::string &query){
+	bool txAllTable = query.find("quik_tx_all") != std::string::npos;
+	if(txAllTable) {
+		if (!longRunningConnection || longRunningConnection->isClosed()) {
+			longRunningConnection.reset(connection.createWebSocket(true));
+		}
+		try{
+			longRunningConnection->send(query);
+			longRunningConnection->checkError();
+			longRunningConnection->close();
+		} catch (...) {
+			longRunningConnection->close();
+			throw;
+		}
+	}
 }
 
 void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {

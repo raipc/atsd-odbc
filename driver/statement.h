@@ -12,6 +12,7 @@
 
 #define SLEEP_SECONDS 10
 #define SLEEP_AFTER_TRIES 3
+#define META_RETRY_COUNT 5
 
 /// Information where and how to add values when reading.
 struct Binding {

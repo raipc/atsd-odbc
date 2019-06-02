@@ -147,8 +147,8 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
             connection.session->reset(); // reset keepalived connection
             connection.sleep = i > SLEEP_AFTER_TRIES;
             LOG("Http request try=" << i << "/" << connection.retry_count << " failed: " << e.what() << ": " << e.message());
-            if (i > connection.retry_count) {
-                throw;
+            if (i > META_RETRY_COUNT) {
+                throw e;
             }
         }
     }

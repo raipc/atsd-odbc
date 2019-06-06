@@ -139,11 +139,19 @@ WebSocketConnection *Connection::createWebSocket(bool validateOnly) {
 
     std::stringstream path;
     path << "/odbc/ws/quik";
+	bool first = true;
     if(validateOnly){
 		path << "?test=parse";
+		first = false;
 	} else if (!test.empty()) {
         path << "?test=" << test;
+		first = false;
     } 
+	if(!tables.empty()){
+        std::string encoded;
+        Poco::URI::encode(tables, "", encoded);
+        path << (first ? "?" : "&") << "customTags=" << encoded; 
+    }
     Poco::Net::HTTPRequest *request = new Poco::Net::HTTPRequest(Poco::Net::HTTPRequest::HTTP_GET, path.str(),
                                                                  Poco::Net::HTTPMessage::HTTP_1_1);
     std::ostringstream user_password_base64;
@@ -184,17 +192,11 @@ void Connection::composeRequest(Poco::Net::HTTPRequest &request, bool meta_mode)
     if (!test.empty()) {
         uri.addQueryParameter("test", test);
     }
-    if(meta_mode){
-        if(!tables.empty()){
-            std::string encoded;
-            Poco::URI::encode(tables, "", encoded);
-            uri.addQueryParameter("tables",encoded);
-        }
-
-        if(expand_tags)
-            uri.addQueryParameter("expandTags", "true");
-        if(meta_columns)
-            uri.addQueryParameter("metaColumns", "true");
+	
+	if(!tables.empty()){
+        std::string encoded;
+        Poco::URI::encode(tables, "", encoded);
+        uri.addQueryParameter("customTags", encoded);
     }
     std::string contentType = "text/plain; charset=utf-8";
     request.setContentType(contentType);

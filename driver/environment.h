@@ -1,9 +1,8 @@
 #pragma once
 
-#include "diagnostics.h"
-
 #include <map>
 #include <stdexcept>
+#include "diagnostics.h"
 
 struct TypeInfo {
     std::string sql_type_name;
@@ -28,6 +27,7 @@ struct Environment {
 
     static const auto string_max_size = 0xFFFFFF;
     static const std::map<std::string, TypeInfo> types_info;
+    const TypeInfo & getTypeInfo(const std::string & type_name, const std::string & type_name_without_parametrs = "") const;
 
     SQLUINTEGER metadata_id = SQL_FALSE;
     int odbc_version =

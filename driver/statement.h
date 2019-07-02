@@ -1,10 +1,10 @@
 #pragma once
 
-#include "connection.h"
-#include "result_set.h"
-#include <Poco/Net/HTTPResponse.h>
 #include <memory>
 #include <sstream>
+#include <Poco/Net/HTTPResponse.h>
+#include "connection.h"
+#include "result_set.h"
 
 /// Information where and how to add values when reading.
 struct Binding {
@@ -36,7 +36,7 @@ public:
     const std::string getQuery() const;
 
     /// Lookup TypeInfo for given name of type.
-    const TypeInfo & getTypeInfo(const std::string & type_name) const;
+    const TypeInfo & getTypeInfo(const std::string & type_name, const std::string & type_name_without_parametrs = "") const;
 
     bool isEmpty() const;
 

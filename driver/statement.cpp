@@ -1,11 +1,12 @@
 #include "statement.h"
-#include "escaping/escape_sequences.h"
-#include "win/version.h"
-#include "platform.h"
 #include <Poco/Base64Encoder.h>
 #include <Poco/Exception.h>
+#include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/URI.h>
+#include "escaping/escape_sequences.h"
+#include "platform.h"
+#include "win/version.h"
 
 Statement::Statement(Connection & conn_) : connection(conn_), metadata_id(conn_.environment.metadata_id) {
     ard.reset(new DescriptorClass);
@@ -34,8 +35,8 @@ const std::string Statement::getQuery() const {
     return query;
 }
 
-const TypeInfo & Statement::getTypeInfo(const std::string & type_name) const {
-    return connection.environment.types_info.at(type_name);
+const TypeInfo & Statement::getTypeInfo(const std::string & type_name, const std::string & type_name_without_parametrs) const {
+    return connection.environment.getTypeInfo(type_name, type_name_without_parametrs);
 }
 
 bool Statement::isEmpty() const {
@@ -89,11 +90,12 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
     request.setURI(path + "?" + uri.getQuery()); /// TODO escaping
     request.set("User-Agent", "atsd-odbc/" VERSION_STRING " (" CMAKE_SYSTEM ")"
 #if defined(UNICODE)
-        " UNICODE"
+              " UNICODE"
 #endif
-    );
+            + (connection.useragent.empty() ? "" : " " + connection.useragent));
 
-    LOG(request.getMethod() << " " << connection.session->getHost() << request.getURI() << " Content Type=" << request.getContentType() <<  " body=" << prepared_query);
+    LOG(request.getMethod() << " " << connection.session->getHost() << request.getURI() << " body=" << prepared_query
+                            << " UA=" << request.get("User-Agent"));
 
     // LOG("curl 'http://" << connection.session->getHost() << ":" << connection.session->getPort() << request.getURI() << "' -d '" << prepared_query << "'");
 

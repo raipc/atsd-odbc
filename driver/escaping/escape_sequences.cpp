@@ -17,7 +17,7 @@ using namespace std;
 
 namespace {
 
-const std::map<const std::string, const std::string> fn_convert_map{
+const std::map<const std::string, const std::string> fn_convert_map {
     {"SQL_TINYINT", "toUInt8"},
     {"SQL_SMALLINT", "toUInt16"},
     {"SQL_INTEGER", "toInt32"},
@@ -34,17 +34,17 @@ const std::map<const std::string, const std::string> fn_convert_map{
 #define DECLARE2(TOKEN, NAME) \
     { Token::TOKEN, NAME }
 
-const std::map<const Token::Type, const std::string> function_map{
+const std::map<const Token::Type, const std::string> function_map {
 #include "function_declare.h"
 };
 
 #undef DECLARE2
 
-const std::map<const Token::Type, const std::string> function_map_strip_params{
+const std::map<const Token::Type, const std::string> function_map_strip_params {
     {Token::CURRENT_TIMESTAMP, "now()"},
 };
 
-const std::map<const Token::Type, const std::string> literal_map{
+const std::map<const Token::Type, const std::string> literal_map {
     // {Token::SQL_TSI_FRAC_SECOND, ""},
     {Token::SQL_TSI_SECOND, "'second'"},
     {Token::SQL_TSI_MINUTE, "'minute'"},
@@ -56,7 +56,7 @@ const std::map<const Token::Type, const std::string> literal_map{
     {Token::SQL_TSI_YEAR, "'year'"},
 };
 
-const std::map<const Token::Type, const std::string> timeadd_func_map{
+const std::map<const Token::Type, const std::string> timeadd_func_map {
     // {Token::SQL_TSI_FRAC_SECOND, ""},
     {Token::SQL_TSI_SECOND, "addSeconds"},
     {Token::SQL_TSI_MINUTE, "addMinutes"},
@@ -258,18 +258,17 @@ string processFunction(const StringView seq, Lexer & lex) {
             return seq.to_string();
         lex.Consume();
         return "if(toDayOfWeek(" + param + ") = 7, 1, toDayOfWeek(" + param + ") + 1)";
-
+/*
     } else if (fn.type == Token::DAYOFYEAR) {
         if (!lex.Match(Token::LPARENT))
             return seq.to_string();
 
-        auto param = processIdentOrFunction(seq, lex /*, false*/);
+        auto param = processIdentOrFunction(seq, lex);
         if (param.empty())
             return seq.to_string();
         lex.Consume();
-        //return "if(toDayOfWeek(" + param + ") = 7, 1, toDayOfWeek(" + param + ") + 1)";
         return "( toRelativeDayNum(" + param + ") - toRelativeDayNum(toStartOfYear(" + param + ")) + 1 )";
-
+*/
     } else if (function_map.find(fn.type) != function_map.end()) {
         string result = function_map.at(fn.type);
         auto func = result;

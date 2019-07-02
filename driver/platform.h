@@ -1,7 +1,5 @@
 #pragma once
 
-#include <type_traits>
-
 //#if __has_include("config_cmake.h") // requre c++17
 #if CMAKE_BUILD
 #    include "config_cmake.h"
@@ -35,6 +33,7 @@
 #    define HAVE_SSIZE_T 1
 #
 #    include <winsock2.h>
+// DO NOT REORDER
 #    include <windows.h>
 //#    include <ws2tcpip.h>
 #endif
@@ -42,10 +41,12 @@
 #include <sql.h>
 #include <sqlext.h>
 #include <sqltypes.h>
+#if defined(_IODBCUNIX_H)
+#    include <iodbcext.h>
+#endif
 
 #if defined(_win_)
 #    if defined(UNICODE)
-#        define ODBC_WCHAR 1
 #        include <sqlucode.h>
 
 #        define strcpy wcscpy_s
@@ -66,13 +67,25 @@
 #        endif
 #    endif
 #    if defined(UNICODE)
+#      if defined(ODBC_CHAR16)
 #        define TEXT(value) L"" value
+#      else
+#        define TEXT(value) u"" value
+#      endif
 #    else
 #        define TEXT(value) value
 #    endif
+
+#    if !defined(LPCTSTR)
+#        if defined(UNICODE)
+#            define LPCTSTR LPCWSTR
+#        else
+#            define LPCTSTR LPCSTR
+#        endif
+#    endif
+
 #endif
 
-typedef std::remove_pointer<LPTSTR>::type MYTCHAR;
 #define SIZEOF_CHAR sizeof(SQLTCHAR)
 
 #if defined(_MSC_VER) && !defined(USE_SSL)
@@ -81,5 +94,5 @@ typedef std::remove_pointer<LPTSTR>::type MYTCHAR;
 #endif
 
 #if !defined(CMAKE_SYSTEM) && _win_
-#   define CMAKE_SYSTEM "windows"
+#    define CMAKE_SYSTEM "windows"
 #endif

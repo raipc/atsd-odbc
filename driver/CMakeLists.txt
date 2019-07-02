@@ -13,8 +13,15 @@ function(makelib libname UNICODE)
 if (UNICODE)
     set(UNICODE 1)
     if (ODBC_UNIXODBC)
-        option (SQL_WCHART_CONVERT "Unixodbc SQL_WCHART_CONVERT (use four bytes TCHAR)" 1)
+        option (SQL_WCHART_CONVERT "Unixodbc SQL_WCHART_CONVERT (use four bytes TCHAR)" 0)
     endif ()
+    if(ODBC_IODBC)
+        #option (ODBC_CHAR16 "Strange option for iodbc" 1)
+    endif()
+    if (ODBC_IODBC AND APPLE)
+        set(ODBC_WCHAR 1)
+    endif()
+
     set(_config_add w)
 else ()
     set(UNICODE 0)
@@ -25,19 +32,12 @@ endif ()
 # not unicode   char        1
 # unicode:
 # win           wchar_t     2
-# iodbc         wchar_t     4
+# iodbc LINUX   wchar_t     4           wchar_t != TCHAR
+# iodbc APPLE   wchar_t     4           wchar_t == TCHAR
 # unixodbc      wchar_t     4           true == SQL_WCHART_CONVERT
 # unixodbc      char16_t    2           false == SQL_WCHART_CONVERT
 
-if (UNICODE)
-    if (ODBC_UNIXODBC AND NOT SQL_WCHART_CONVERT)
-        # char16
-    else()
-        set(ODBC_WCHAR 1)
-    endif()
-endif()
-
-message (STATUS "${libname}: UNICODE=${UNICODE} SQL_WCHART_CONVERT=${SQL_WCHART_CONVERT} ODBC_WCHAR=${ODBC_WCHAR}")
+message (STATUS "${libname}: UNICODE=${UNICODE} SQL_WCHART_CONVERT=${SQL_WCHART_CONVERT} ODBC_WCHAR=${ODBC_WCHAR} ODBC_CHAR16=${ODBC_CHAR16}")
 
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config_cmake.h.in ${CMAKE_CURRENT_BINARY_DIR}/config_cmake${_config_add}.h)
 
@@ -64,15 +64,18 @@ if (UNICODE)
     if (SQL_WCHART_CONVERT)
         target_compile_definitions(${libname} PUBLIC -DSQL_WCHART_CONVERT=1)
     endif ()
+    #if(ODBC_IODBC)
+    #    target_compile_definitions(${libname} PUBLIC -DSQL_NOUNICODEMAP=1)
+    #endif()
 endif ()
 
 target_compile_definitions (${libname} PRIVATE "-DCMAKE_BUILD=1")
 
 target_include_directories (${libname} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-if (NOT USE_INTERNAL_POCO_LIBRARY)
+#if (NOT USE_INTERNAL_POCO_LIBRARY)
     target_include_directories (${libname} PRIVATE ${Poco_INCLUDE_DIRS})
-endif()
+#endif()
 
 if (NOT WIN32)
     target_include_directories (${libname} PRIVATE ${ODBC_INCLUDE_DIRECTORIES})
@@ -95,12 +98,16 @@ if(NOT APPLE AND NOT WIN32)
     target_link_libraries(${libname} PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/linker_script")
 endif()
 
-if (WIN32)
+if(WIN32)
   target_link_libraries(${libname} PRIVATE atsd-odbc-win ws2_32 Iphlpapi legacy_stdio_definitions)
 endif()
 
-if (NOT WIN32)
+if(NOT WIN32)
     install(TARGETS ${libname} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/odbc)
+endif()
+
+if(ARCH_LINUX)
+    target_link_libraries(${libname} PRIVATE Threads::Threads)
 endif()
 
 endfunction()

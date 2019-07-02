@@ -1,6 +1,8 @@
 
-    // https://docs.faircom.com/doc/sqlref/33391.htm
-    // https://docs.microsoft.com/en-us/sql/odbc/reference/appendixes/appendix-e-scalar-functions
+// https://docs.faircom.com/doc/sqlref/33391.htm
+// https://docs.microsoft.com/en-us/sql/odbc/reference/appendixes/appendix-e-scalar-functions
+
+// clang-format off
 
     // Numeric
     DECLARE2(ABS, "abs"),
@@ -61,7 +63,7 @@
     DECLARE2(CURRENT_DATE, "today"),
     DECLARE2(DAYOFMONTH, "toDayOfMonth"),
     // DECLARE2(DAYOFWEEK, " toDayOfWeek"), // special handling
-    // DECLARE2(DAYOFYEAR, " toDayOfYear"), 
+    DECLARE2(DAYOFYEAR, " toDayOfYear"), // Supported by ClickHouse since 18.13.0
     DECLARE2(EXTRACT, "EXTRACT"), // Do not touch extract inside {fn ... }
     DECLARE2(HOUR, "toHour"),
     DECLARE2(MINUTE, "toMinute"),
@@ -69,7 +71,7 @@
     DECLARE2(NOW, "now"),
     DECLARE2(SECOND, "toSecond"),
     DECLARE2(TIMESTAMPDIFF, "dateDiff"),
-    // DECLARE2(WEEK, ""),
+    DECLARE2(WEEK, "toISOWeek"),
     DECLARE2(SQL_TSI_QUARTER, "toQuarter"),
     DECLARE2(YEAR, "toYear"),
 

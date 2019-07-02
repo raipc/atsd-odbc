@@ -2,11 +2,14 @@
 
 #include <memory>
 #include <mutex>
-#include <Poco/Net/HTTPClientSession.h>
-
 #include "diagnostics.h"
 #include "environment.h"
-//namespace Poco { namespace Net { class HTTPClientSession; } }
+
+namespace Poco {
+namespace Net {
+    class HTTPClientSession;
+}
+}
 
 struct Connection {
     Environment & environment;
@@ -32,6 +35,8 @@ struct Connection {
 	std::string tables;
 	bool expand_tags = false;
 	bool meta_columns = false;
+
+    std::string useragent;
 
     std::unique_ptr<Poco::Net::HTTPClientSession> session;
     DiagnosticRecord diagnostic_record;

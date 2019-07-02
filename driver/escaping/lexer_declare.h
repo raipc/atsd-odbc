@@ -1,6 +1,7 @@
 
+// clang-format off
+
     DECLARE(DAYOFWEEK),
-    DECLARE(DAYOFYEAR),
     DECLARE(TIMESTAMPADD),
     DECLARE(CONVERT),
     DECLARE(LOCATE),

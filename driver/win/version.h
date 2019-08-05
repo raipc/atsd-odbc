@@ -2,9 +2,9 @@
 // TODO: make automatic
 
 #define VERSION_MAJOR 1
-#define VERSION_MINOR 0
+#define VERSION_MINOR 1
 #define VERSION_PATCH 0
-#define VERSION_TWEAK 20190523
+#define VERSION_TWEAK 20190805
 #define VERSION_EXTRA ""
 
 

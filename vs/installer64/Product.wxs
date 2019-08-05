@@ -22,11 +22,11 @@
   <?endif ?>
 
   <?define CrtMergeModule = "$(env.ProgramFiles)\Microsoft Visual Studio\2017\Community\VC\Redist\MSVC\14.16.27012\MergeModules\Microsoft_VC141_CRT_x64.msm" ?>
-  <?define ANSI_ID = "28A3E29D-D2C2-4C6F-81FA-EA8EE996EF48" ?>
-  <?define POCOLIB_ID = "D771CE33-985F-4C0B-ADE1-629115BEA253" ?>
-  <?define PRODUCT_ID= "95D57456-859E-41DA-916C-12B47D5C453C" ?>
-  <?define UNICODE_ID = "A432381E-C944-4A44-BF5E-DF59BC71979B" ?>
-  <?define UPGRADE_ID = "D1DD9A55-16F6-477A-9DBE-E2603F96DDE5" ?>
+  <?define ANSI_ID = "1b035aff-e9cc-452b-ae01-d157fc67b82e" ?>
+  <?define POCOLIB_ID = "a95292e6-05be-43d3-82c1-1d864bdafcfc" ?>
+  <?define PRODUCT_ID= "03df8eb1-9cec-4dac-8f56-33208cc2f3fc" ?>
+  <?define UNICODE_ID = "efcffaf9-441e-4390-a7f5-176e6eb52ea3" ?>
+  <?define UPGRADE_ID = "9430e0ae-07b6-43ab-85dc-b85a14c44b23" ?>
 
   <!-- Product details -->
   <Product Id="$(var.PRODUCT_ID)"

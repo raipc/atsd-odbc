@@ -63,7 +63,7 @@
     DECLARE2(CURRENT_DATE, "today"),
     DECLARE2(DAYOFMONTH, "toDayOfMonth"),
     // DECLARE2(DAYOFWEEK, " toDayOfWeek"), // special handling
-    DECLARE2(DAYOFYEAR, " toDayOfYear"), // Supported by ClickHouse since 18.13.0
+    DECLARE2(DAYOFYEAR, " toDayOfYear"),
     DECLARE2(EXTRACT, "EXTRACT"), // Do not touch extract inside {fn ... }
     DECLARE2(HOUR, "toHour"),
     DECLARE2(MINUTE, "toMinute"),

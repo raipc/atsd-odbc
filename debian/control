@@ -1,6 +1,6 @@
 Source: atsd-odbc
 Priority: optional
-Maintainer: Alexey Milovidov <milovidov@yandex-team.ru>
+Maintainer: ATSD <null@axibase.com>
 Build-Depends: debhelper (>= 9), cmake3 | cmake, lsb-release, unixodbc-dev | libiodbc2-dev
 Standards-Version: 4.1.1
 
@@ -8,5 +8,5 @@ Package: atsd-odbc
 Section: database
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: ATSD odbc driver
+Description: ATSD ODBC driver
  .

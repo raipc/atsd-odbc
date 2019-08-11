@@ -1,75 +1,42 @@
-[![Build Status](https://travis-ci.org/axibase/atsd-odbc.svg?branch=master)](https://travis-ci.org/axibase/atsd-odbc)
+# ATSD ODBC Driver
 
-If you are macos user see [MACOS.md](MACOS.md)
+## Overview
 
-## Cloning a Project with Submodules
+The driver provides access to the Axibase Time Series Database for applications that support the ODBC database connectivity protocol. It is primarily used by programs running on Microsoft Windows.
 
-Please note - [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) are used in this project. 
+## Syntax
 
-When you clone such a project, by default you get the directories that contain submodules, but none of the files within them.
-So, in order to build the project, you need either:
-  * clone repo with all submodules altogether (use `--recursive`)
-```bash
-git clone --recursive https://github.com/axibase/atsd-odbc
-```
-  * or add submodules manually after main project cloned - in the root of source tree run:
-```bash
-git submodule update --init --recursive
-```
+ATSD SQL supports the following DML query types.
 
-## Installing Prerequisites (Linux)
+* `SELECT`
+* `INSERT`
+* `UPDATE`
+* `DELETE`
 
-You'll need to have installed:
-  * Fresh C compiler, which understands -std=c++14
-  * Static libraries 
-    * static **libgcc**
-    * static **libstdc++**
-    * static **libodbc**
-  * cmake >= 3
+The syntax and examples are provided in the [SQL](https://axibase.com/docs/atsd/sql/) documentation.
 
+DDL statements are not supported since the ATSD schema is self-managed.
 
-### DEB-based Linux
-Install unixodbc-dev >= 2.3.0 or libiodbc2-dev
-```bash
-sudo apt install unixodbc-dev
-```
-or
-```bash
-sudo apt install libiodbc2-dev
-```
+## Installation
 
-### RPM-based Linux
-CentOS is shipped with gcc 4.X, which is not suitable for this task.
-Fedora and CentOS do not have static libodbc provided, so you'll need either to build your own, or download 3-rd party packages.
-Static libodbc is available for [Fedora 25](https://github.com/Altinity/unixODBC/tree/master/RPMS/Fedora25) and [Fedora 26](https://github.com/Altinity/unixODBC/tree/master/RPMS/Fedora26).
-If you are running another OS, you can try to build your own RPMs from [this project](https://github.com/Altinity/unixODBC).
+* Download the latest `msi` package for your platform from the [Releases](https://github.com/axibase/atsd-odbc/releases) section.
+* Make sure that the package file (32 or 64 bit) corresponds to the OS platform.
+* Follow the prompts to install the driver.
 
+## Configuration
 
-## Building (Linux)
+* Open **Administrative Tools**, click **Data Sources (ODBC)**.
+* Select driver encoding.
+* Click **Add** on the **User DSN** tab and specify connection settings.
 
-1. At the root of source directory:
-```bash
-mkdir -p build; cd build && cmake .. && make -j $(nproc || sysctl -n hw.ncpu || echo 4)
-```
-Please use cmake3 to build the project on CentOS 7. You can install it with `yum install cmake3`.
-
-2. libatsdodbc.so will be at ```build/driver/libatsdodbc.so```
-
-```
-mkdir -p build; cd build && cmake .. && make -j $(nproc || sysctl -n hw.ncpu || echo 4)
-```
-
-## Building (Linux Debian based .deb package)
-```
-sudo apt install -y devscripts debhelper cmake ninja-build lsb-release unixodbc-dev
-debuild -us -uc -i --source-option=--format="3.0 (native)"
-```
-or
-```
-sudo apt install -y sudo pbuilder fakeroot debhelper debian-archive-keyring debian-keyring
-sudo pbuilder create --configfile debian/.pbuilderrc && pdebuild --configfile debian/.pbuilderrc
-```
-
-
-## Building (windows visual studio)
-```cd vs && build_vs.bat```
+Property | Required | Description
+---|---|---
+Name | yes | Data source name
+Description | no | Short data source description
+Host | yes | Hostname or IP address of the target ATSD server
+Port | yes | HTTPS Port of the target ATSD server. Default is 8443.
+User | yes | Username
+Password | yes | Password
+Table | no | Expression to filter available tables (metrics). Use `%` as a wildcard.
+Expand Tags | No | Expand the `tags` column into multiple columns.
+Meta Columns | No | Add metadata columns in `SELECT *` columns and table metadata queries.

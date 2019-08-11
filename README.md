@@ -17,6 +17,10 @@ The syntax and examples are provided in the [SQL](https://axibase.com/docs/atsd/
 
 DDL statements are not supported since the ATSD schema is self-managed.
 
+## Protocol
+
+The driver communicates with the ATSD using the SSL protocol. Enable the **Ignore SSL Errors** setting in case the target server is using the self-signed [certificate](https://axibase.com/docs/atsd/administration/ssl-ca-signed.html).
+
 ## Installation
 
 * Download the latest `msi` package for your platform from the [Releases](https://github.com/axibase/atsd-odbc/releases) section.
@@ -35,6 +39,7 @@ Name | yes | Data source name
 Description | no | Short data source description
 Host | yes | Hostname or IP address of the target ATSD server
 Port | yes | HTTPS Port of the target ATSD server. Default is 8443.
+Ignore SSL Errors | yes | Ignore SSL certificate validation errors.
 User | yes | Username
 Password | yes | Password
 Table | no | Expression to filter available tables (metrics). Use `%` as a wildcard.

@@ -719,16 +719,6 @@ RETCODE SQL_API FUNCTION_MAYBE_W(SQLColumns)(HSTMT statement_handle,
         query << "SELECT * FROM COLUMNS";
         std::string s;
 		bool where_is_set = false;
-        s = stringFromSQLSymbols(catalog_name, catalog_name_length);
-        if (s.length() > 0) {
-            query << " AND TABLE_CAT LIKE '" << s << "'";
-        } else {
-            query << " AND TABLE_CAT = currentDatabase()";
-        }
-
-        s = stringFromSQLSymbols(schema_name, schema_name_length);
-        if (s.length() > 0)
-            query << " AND TABLE_SCHEM LIKE '" << s << "'";
 
         s = stringFromSQLSymbols(table_name, table_name_length);
         if (s.length() > 0){

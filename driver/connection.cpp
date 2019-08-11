@@ -94,12 +94,10 @@ void Connection::init() {
 
     session = std::unique_ptr<Poco::Net::HTTPClientSession>(
 #if USE_SSL
-        is_ssl ? new Poco::Net::HTTPSClientSession :
+        is_ssl ? new Poco::Net::HTTPSClientSession(server, port) :
 #endif
-               new Poco::Net::HTTPClientSession);
+               new Poco::Net::HTTPClientSession(server, port));
 
-    session->setHost(server);
-    session->setPort(port);
     session->setKeepAlive(true);
     session->setTimeout(Poco::Timespan(connection_timeout, 0), Poco::Timespan(timeout, 0), Poco::Timespan(timeout, 0));
     session->setKeepAliveTimeout(Poco::Timespan(86400, 0));

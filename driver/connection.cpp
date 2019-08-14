@@ -307,10 +307,6 @@ void Connection::setDefaults() {
         path = "/" + path;
     if (stringmaxlength == 0)
         stringmaxlength = Environment::string_max_size;
-    if (user.empty())
-        user = "default";
-    if (database.empty())
-        database = "default";
     if (timeout == 0)
         timeout = 30;
     if (connection_timeout == 0)

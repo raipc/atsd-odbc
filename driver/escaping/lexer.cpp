@@ -145,7 +145,7 @@ Token Lexer::NextToken() {
             case ',':
                 return MakeToken(Token::COMMA, 1);
 
-            case '\'': {
+            case '\"': {
                 const char * st = cur_;
                 bool has_slash = false;
 
@@ -154,7 +154,7 @@ Token Lexer::NextToken() {
                         has_slash = true;
                         continue;
                     }
-                    if (*cur_ == '\'' && !has_slash) {
+                    if (*cur_ == '\"' && !has_slash) {
                         return Token {Token::STRING, StringView(st, ++cur_)};
                     }
 

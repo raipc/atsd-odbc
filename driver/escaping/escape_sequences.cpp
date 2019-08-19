@@ -10,7 +10,7 @@
 #include <iostream>
 #include <map>
 #include "lexer.h"
-//#include "log/log.h"
+#include "..\log/log.h"
 
 
 using namespace std;
@@ -328,7 +328,7 @@ string removeMilliseconds(const StringView token) {
     const char * begin = token.data();
     const char * p = begin + token.size() - 1;
     const char * dot = nullptr;
-    const bool quoted = (*p == '\'');
+    const bool quoted = (*p == '\"'); //TODO check millisec quotes
     if (quoted) {
         --p;
     }
@@ -343,7 +343,7 @@ string removeMilliseconds(const StringView token) {
             dot = p;
         } else {
             if (dot) {
-                return string(begin, dot) + (quoted ? "'" : "");
+                return string(begin, dot) + (quoted ? "\"" : "");
             }
             return token.to_string();
         }

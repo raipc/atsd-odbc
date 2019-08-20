@@ -252,8 +252,8 @@ RETCODE SQL_API SQLGetInfo(
 
             //CASE_NUM(SQL_UNION, SQLUINTEGER, SQL_U_UNION | SQL_U_UNION_ALL)
 
-            /// UINTEGER empty bitmasks
-			CASE_FALLTHROUGH(SQL_UNION) //UNION is not available in ATSD
+            // UINTEGER empty bitmasks
+	    CASE_FALLTHROUGH(SQL_UNION) //UNION is not available in ATSD
             CASE_FALLTHROUGH(SQL_ALTER_DOMAIN)
             CASE_FALLTHROUGH(SQL_BATCH_ROW_COUNT)
             CASE_FALLTHROUGH(SQL_BATCH_SUPPORT)

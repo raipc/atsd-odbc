@@ -56,16 +56,15 @@ const std::map<const Token::Type, const std::string> literal_map {
     {Token::SQL_TSI_YEAR, "'year'"},
 };
 
-const std::map<const Token::Type, const std::string> timeadd_func_map {
-    // {Token::SQL_TSI_FRAC_SECOND, ""},
-    {Token::SQL_TSI_SECOND, "addSeconds"},
-    {Token::SQL_TSI_MINUTE, "addMinutes"},
-    {Token::SQL_TSI_HOUR, "addHours"},
-    {Token::SQL_TSI_DAY, "addDays"},
-    {Token::SQL_TSI_WEEK, "addWeeks"},
-    {Token::SQL_TSI_MONTH, "addMonths"},
-    {Token::SQL_TSI_QUARTER, "addQuarters"},
-    {Token::SQL_TSI_YEAR, "addYears"},
+const std::map<const Token::Type, const std::string> units_map{
+	{Token::SQL_TSI_SECOND, "second"},
+    {Token::SQL_TSI_MINUTE, "minute"},
+    {Token::SQL_TSI_HOUR, "hour"},
+    {Token::SQL_TSI_DAY, "day"},
+    {Token::SQL_TSI_WEEK, "week"},
+    {Token::SQL_TSI_MONTH, "month"},
+    {Token::SQL_TSI_QUARTER, "quarter"},
+    {Token::SQL_TSI_YEAR, "year"},
 };
 
 
@@ -187,10 +186,13 @@ string processFunction(const StringView seq, Lexer & lex) {
         if (!lex.Match(Token::LPARENT))
             return seq.to_string();
 
-        Token type = lex.Consume();
-        if (timeadd_func_map.find(type.type) == timeadd_func_map.end())
+        if (function_map.find(fn.type) == function_map.end())
             return seq.to_string();
-        string func = timeadd_func_map.at(type.type);
+        string func = function_map.at(fn.type);
+        Token type = lex.Consume();
+        if (units_map.find(type.type) == units_map.end())
+            return seq.to_string();
+        string addUnits = units_map.at(type.type);
         if (!lex.Match(Token::COMMA))
             return seq.to_string();
         auto ramount = processIdentOrFunction(seq, lex);
@@ -214,7 +216,7 @@ string processFunction(const StringView seq, Lexer & lex) {
             if (!lex.Match(Token::RPARENT)) {
                 return seq.to_string();
             }
-            result = func + "(" + rdate + ", " + ramount + ")";
+            result = func + "(" + addUnits + ", " + ramount + ", " + rdate + ")";
         }
         return result;
 
@@ -289,6 +291,7 @@ string processFunction(const StringView seq, Lexer & lex) {
                 result += processFunction(seq, lex);
             } else {
                 if (func != "EXTRACT" && literal_map.find(tok.type) != literal_map.end()) {
+					LOG("Adding literal" << literal_map.at(tok.type) << " to " << result);
                     result += literal_map.at(tok.type);
                 } else
                     result += tok.literal.to_string();

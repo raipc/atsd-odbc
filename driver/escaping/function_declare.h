@@ -20,7 +20,7 @@
     DECLARE2(LOG10, "log10"),
     DECLARE2(MOD, "modulo"),
     DECLARE2(PI, "pi"),
-    DECLARE2(POWER, "pow"),
+    DECLARE2(POWER, "power"),
     // DECLARE2(RADIANS, ""),
     DECLARE2(RAND, "rand"),
     DECLARE2(ROUND, "round"),

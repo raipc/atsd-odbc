@@ -10,14 +10,14 @@
 #include <iostream>
 #include <map>
 #include "lexer.h"
-//#include "log/log.h"
+#include "..\log/log.h"
 
 
 using namespace std;
 
 namespace {
 
-const std::map<const std::string, const std::string> fn_convert_map {
+/*const std::map<const std::string, const std::string> fn_convert_map {
     {"SQL_TINYINT", "toUInt8"},
     {"SQL_SMALLINT", "toUInt16"},
     {"SQL_INTEGER", "toInt32"},
@@ -29,7 +29,7 @@ const std::map<const std::string, const std::string> fn_convert_map {
     {"SQL_TYPE_DATE", "toDate"},
     {"SQL_TIMESTAMP", "toDateTime"},
     {"SQL_TYPE_TIMESTAMP", "toDateTime"},
-};
+};*/
 
 #define DECLARE2(TOKEN, NAME) \
     { Token::TOKEN, NAME }
@@ -71,13 +71,13 @@ const std::map<const Token::Type, const std::string> timeadd_func_map {
 
 string processEscapeSequencesImpl(const StringView seq, Lexer & lex);
 
-string convertFunctionByType(const StringView & typeName) {
+/*string convertFunctionByType(const StringView & typeName) {
     const auto type_name_string = typeName.to_string();
     if (fn_convert_map.find(type_name_string) != fn_convert_map.end())
         return fn_convert_map.at(type_name_string);
 
     return string();
-}
+}*/
 
 string processParentheses(const StringView seq, Lexer & lex) {
     string result;
@@ -143,7 +143,7 @@ string processIdentOrFunction(const StringView seq, Lexer & lex) {
 string processFunction(const StringView seq, Lexer & lex) {
     const Token fn(lex.Consume());
 
-    if (fn.type == Token::CONVERT) {
+    /*if (fn.type == Token::CONVERT) {
         string result;
         if (!lex.Match(Token::LPARENT))
             return seq.to_string();
@@ -181,7 +181,8 @@ string processFunction(const StringView seq, Lexer & lex) {
 
         return result;
 
-    } else if (fn.type == Token::TIMESTAMPADD) {
+    } else */
+	if (fn.type == Token::TIMESTAMPADD) {
         string result;
         if (!lex.Match(Token::LPARENT))
             return seq.to_string();
@@ -328,7 +329,7 @@ string removeMilliseconds(const StringView token) {
     const char * begin = token.data();
     const char * p = begin + token.size() - 1;
     const char * dot = nullptr;
-    const bool quoted = (*p == '\'');
+    const bool quoted = (*p == '\''); //TODO check millisec quotes
     if (quoted) {
         --p;
     }
@@ -343,7 +344,7 @@ string removeMilliseconds(const StringView token) {
             dot = p;
         } else {
             if (dot) {
-                return string(begin, dot) + (quoted ? "'" : "");
+                return string(begin, dot) + (quoted ? "\'" : "");
             }
             return token.to_string();
         }

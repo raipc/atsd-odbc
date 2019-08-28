@@ -167,10 +167,10 @@ Token Lexer::NextToken() {
             default: {
                 const char * st = cur_;
 
-                if (*cur_ == '`') {
+                if (*cur_ == '"') {
                     bool inside_quotes = true;
                     for (++cur_; cur_ < end_; ++cur_) {
-                        if (*cur_ == '`') {
+                        if (*cur_ == '"') {
                             inside_quotes = !inside_quotes;
                             if (cur_ < end_ && *(cur_ + 1) == '.') {
                                 ++cur_;
@@ -180,7 +180,7 @@ Token Lexer::NextToken() {
                             if (cur_ < end_)
                                 ++cur_;
                         }
-                        if (!isalpha(*cur_) && !isdigit(*cur_) && *cur_ != '_' && *cur_ != '.') {
+                        if (!isalpha(*cur_) && !isdigit(*cur_) && *cur_ != '_' && *cur_ != '.' && *cur_ != '-') {
                             return Token {Token::INVALID, StringView(st, cur_)};
                         }
                     }
@@ -190,7 +190,7 @@ Token Lexer::NextToken() {
 
                 if (isalpha(*cur_) || *cur_ == '_') {
                     for (++cur_; cur_ < end_; ++cur_) {
-                        if (!isalpha(*cur_) && !isdigit(*cur_) && *cur_ != '_' && *cur_ != '.') {
+                        if (!isalpha(*cur_) && !isdigit(*cur_) && *cur_ != '_' && *cur_ != '.' && *cur_ != '-') {
                             break;
                         }
                     }

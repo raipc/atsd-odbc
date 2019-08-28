@@ -65,6 +65,8 @@
     // DECLARE2(DAYOFWEEK, " toDayOfWeek"), // special handling
     DECLARE2(DAYOFYEAR, " toDayOfYear"),
     DECLARE2(EXTRACT, "EXTRACT"), // Do not touch extract inside {fn ... }
+    DECLARE2(TIMESTAMPADD, "dateAdd"),
+    //Consider deleting all of the below functions
     DECLARE2(HOUR, "toHour"),
     DECLARE2(MINUTE, "toMinute"),
     DECLARE2(MONTH, "toMonth"),

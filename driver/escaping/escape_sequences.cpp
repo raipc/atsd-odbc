@@ -56,18 +56,6 @@ const std::map<const Token::Type, const std::string> literal_map {
     {Token::SQL_TSI_YEAR, "'year'"},
 };
 
-const std::map<const Token::Type, const std::string> timeadd_func_map {
-    // {Token::SQL_TSI_FRAC_SECOND, ""},
-    {Token::SQL_TSI_SECOND, "addSeconds"},
-    {Token::SQL_TSI_MINUTE, "addMinutes"},
-    {Token::SQL_TSI_HOUR, "addHours"},
-    {Token::SQL_TSI_DAY, "addDays"},
-    {Token::SQL_TSI_WEEK, "addWeeks"},
-    {Token::SQL_TSI_MONTH, "addMonths"},
-    {Token::SQL_TSI_QUARTER, "addQuarters"},
-    {Token::SQL_TSI_YEAR, "addYears"},
-};
-
 
 string processEscapeSequencesImpl(const StringView seq, Lexer & lex);
 
@@ -187,10 +175,15 @@ string processFunction(const StringView seq, Lexer & lex) {
         if (!lex.Match(Token::LPARENT))
             return seq.to_string();
 
-        Token type = lex.Consume();
-        if (timeadd_func_map.find(type.type) == timeadd_func_map.end())
+        if (function_map.find(fn.type) == function_map.end()) {
+            LOG("No name found for TIMESTAMPADD");
             return seq.to_string();
-        string func = timeadd_func_map.at(type.type);
+        }
+        string func = function_map.at(fn.type);
+        Token type = lex.Consume();
+        if (literal_map.find(type.type) == literal_map.end())
+            return seq.to_string();
+        string addUnits = literal_map.at(type.type);
         if (!lex.Match(Token::COMMA))
             return seq.to_string();
         auto ramount = processIdentOrFunction(seq, lex);
@@ -214,7 +207,7 @@ string processFunction(const StringView seq, Lexer & lex) {
             if (!lex.Match(Token::RPARENT)) {
                 return seq.to_string();
             }
-            result = func + "(" + rdate + ", " + ramount + ")";
+            result = func + "(" + addUnits + ", " + ramount + ", " + rdate + ")";
         }
         return result;
 

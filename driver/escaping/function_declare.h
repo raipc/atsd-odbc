@@ -61,21 +61,21 @@
     // Date
     DECLARE2(CURDATE, "today"),
     DECLARE2(CURRENT_DATE, "today"),
-    DECLARE2(DAYOFMONTH, "toDayOfMonth"),
-    // DECLARE2(DAYOFWEEK, " toDayOfWeek"), // special handling
-    DECLARE2(DAYOFYEAR, " toDayOfYear"),
+    DECLARE2(DAYOFMONTH, "toDayOfMonth"), //not found in docs
+    DECLARE2(DAYOFWEEK, "DayOfWeek"),
+    DECLARE2(DAYOFYEAR, " toDayOfYear"), //not found in docs
     DECLARE2(EXTRACT, "EXTRACT"), // Do not touch extract inside {fn ... }
     DECLARE2(TIMESTAMPADD, "dateAdd"),
     //Consider deleting all of the below functions
-    DECLARE2(HOUR, "toHour"),
-    DECLARE2(MINUTE, "toMinute"),
-    DECLARE2(MONTH, "toMonth"),
+    DECLARE2(HOUR, "Hour"),
+    DECLARE2(MINUTE, "Minute"),
+    DECLARE2(MONTH, "Month"),
     DECLARE2(NOW, "now"),
-    DECLARE2(SECOND, "toSecond"),
+    DECLARE2(SECOND, "Second"),
     DECLARE2(TIMESTAMPDIFF, "dateDiff"),
-    DECLARE2(WEEK, "toISOWeek"),
-    DECLARE2(SQL_TSI_QUARTER, "toQuarter"),
-    DECLARE2(YEAR, "toYear"),
+    DECLARE2(WEEK, "toISOWeek"), //not found in docs
+    DECLARE2(SQL_TSI_QUARTER, "Quarter"),
+    DECLARE2(YEAR, "Year"),
 
     // DECLARE2(DATABASE, ""),
     DECLARE2(IFNULL, "ifNull"),

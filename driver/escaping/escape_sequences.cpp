@@ -120,7 +120,7 @@ string processIdentOrFunction(const StringView seq, Lexer & lex) {
         result += processEscapeSequencesImpl(seq, lex);
         lex.SetEmitSpaces(true);
     } else if(function_map.find(token.type) != function_map.end()) { //if function is not covered in {}, not sure if this is not a syntax error for ODBC
-        result += token.literal.to_string();       // func name
+        result += function_map.at(token.type);                                            // func name
 		lex.Consume();
 		result += processParentheses(seq, lex);
     } else if (token.type == Token::LPARENT) {

@@ -186,18 +186,25 @@ string processFunction(const StringView seq, Lexer & lex) {
         if (!lex.Match(Token::LPARENT))
             return seq.to_string();
 
-        if (function_map.find(fn.type) == function_map.end())
-            return seq.to_string();
+        if (function_map.find(fn.type) == function_map.end()) {
+			LOG("TIMESTAMPADD not found");
+			return seq.to_string();
+		}
         string func = function_map.at(fn.type);
         Token type = lex.Consume();
-        if (units_map.find(type.type) == units_map.end())
-            return seq.to_string();
+		if (units_map.find(type.type) == units_map.end()) {
+			LOG("Unit " << type.literal << " not found");
+			return seq.to_string();
+		}
         string addUnits = units_map.at(type.type);
+		LOG("Preparing " << func << " for unit type " << addUnits);
         if (!lex.Match(Token::COMMA))
             return seq.to_string();
         auto ramount = processIdentOrFunction(seq, lex);
-        if (ramount.empty())
-            return seq.to_string();
+		if (ramount.empty()) {
+			LOG("Could not parse ramount");
+			return seq.to_string();
+		}
 
         while (lex.Match(Token::SPACE)) {
         }
@@ -207,8 +214,10 @@ string processFunction(const StringView seq, Lexer & lex) {
 
 
         auto rdate = processIdentOrFunction(seq, lex);
-        if (rdate.empty())
-            return seq.to_string();
+		if (rdate.empty()) {
+			LOG("Cold not parse rdate for");
+			return seq.to_string();
+		}
 
         if (!func.empty()) {
             while (lex.Match(Token::SPACE)) {
@@ -252,26 +261,6 @@ string processFunction(const StringView seq, Lexer & lex) {
         lex.Consume();
         return "replaceRegexpOne(" + param + ", '^\\\\s+', '')";
 
-    } else if (fn.type == Token::DAYOFWEEK) {
-        if (!lex.Match(Token::LPARENT))
-            return seq.to_string();
-
-        auto param = processIdentOrFunction(seq, lex /*, false*/);
-        if (param.empty())
-            return seq.to_string();
-        lex.Consume();
-        return "if(toDayOfWeek(" + param + ") = 7, 1, toDayOfWeek(" + param + ") + 1)";
-/*
-    } else if (fn.type == Token::DAYOFYEAR) {
-        if (!lex.Match(Token::LPARENT))
-            return seq.to_string();
-
-        auto param = processIdentOrFunction(seq, lex);
-        if (param.empty())
-            return seq.to_string();
-        lex.Consume();
-        return "( toRelativeDayNum(" + param + ") - toRelativeDayNum(toStartOfYear(" + param + ")) + 1 )";
-*/
     } else if (function_map.find(fn.type) != function_map.end()) {
         string result = function_map.at(fn.type);
         auto func = result;

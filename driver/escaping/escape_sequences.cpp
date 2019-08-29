@@ -119,6 +119,10 @@ string processIdentOrFunction(const StringView seq, Lexer & lex) {
         lex.SetEmitSpaces(false);
         result += processEscapeSequencesImpl(seq, lex);
         lex.SetEmitSpaces(true);
+    } else if(function_map.find(token.type) != function_map.end()) { //if function is not covered in {}, not sure if this is not a syntax error for ODBC
+        result += function_map.at(token.type);                                            // func name
+		lex.Consume();
+		result += processParentheses(seq, lex);
     } else if (token.type == Token::LPARENT) {
         result += processParentheses(seq, lex);
     } else if (token.type == Token::IDENT && lex.LookAhead(1).type == Token::LPARENT) { // CAST( ... )

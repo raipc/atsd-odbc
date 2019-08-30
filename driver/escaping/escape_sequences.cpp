@@ -317,7 +317,7 @@ string processDate(const StringView seq, Lexer & lex) {
     if (data.isInvalid()) {
         return seq.to_string();
     } else {
-        return string("toDate(") + data.literal.to_string() + ")";
+        return data.literal.to_string();
     }
 }
 
@@ -358,7 +358,7 @@ string processDateTime(const StringView seq, Lexer & lex) {
     if (data.isInvalid()) {
         return seq.to_string();
     } else {
-        return string("toDateTime(") + removeMilliseconds(data.literal) + ")";
+        return removeMilliseconds(data.literal);
     }
 }
 

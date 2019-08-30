@@ -67,6 +67,10 @@ const std::map<const Token::Type, const std::string> units_map{
     {Token::SQL_TSI_YEAR, "year"},
 };
 
+const std::map<const std::string, const std::string> replacement_map {
+    {"DISTINCT", ""},
+};
+
 
 string processEscapeSequencesImpl(const StringView seq, Lexer & lex);
 
@@ -399,6 +403,31 @@ string processEscapeSequences(const StringView seq) {
     return processEscapeSequencesImpl(seq, lex);
 }
 
+string replaceForbiddenSequences(const StringView seq) {
+    Lexer lex(seq);
+    string result;
+
+    while(true) {
+        const Token token(lex.Consume());
+        if(token.isInvalid()) {
+            return seq.to_string();
+        }
+        if(token.type == Token::EOS) {
+            break;
+        }
+
+        if(replacement_map.find(token.literal.to_string()) != replacement_map.end()) {
+            result += replacement_map.at(token.literal.to_string());
+            result += " ";
+        } else {
+            result += token.literal.to_string();
+            result += " ";
+        }
+    }
+
+    return result;
+}
+
 } // namespace
 
 std::string replaceEscapeSequences(const std::string & query) {
@@ -439,5 +468,8 @@ std::string replaceEscapeSequences(const std::string & query) {
         ret += std::string(st, p);
     }
 
-    return ret;
+    const char * ret_start = ret.c_str();
+    const char * ret_end = ret_start + ret.size();
+
+    return replaceForbiddenSequences(StringView(ret_start, ret_end));
 }

@@ -67,12 +67,11 @@ void Statement::sendRequest(IResultMutatorPtr mutator, bool meta_mode) {
 			Poco::URI::encode(connection.tables, "", encoded);
 			uri.addQueryParameter("tables",encoded);
 		}
-			
-		if(connection.expand_tags)
-			uri.addQueryParameter("expandTags", "true");
-		if(connection.meta_columns)
-			uri.addQueryParameter("metaColumns", "true");
 	}
+	if(connection.expand_tags)
+		uri.addQueryParameter("expandTags", "true");
+	if(connection.meta_columns)
+		uri.addQueryParameter("metaColumns", "true");
     #if !defined(UNICODE)
 	{
 		if(connection.environment.code_page > 0){

@@ -429,32 +429,32 @@ string replaceForbiddenSequences(const StringView seq) {
     return result;
 }
 
-string unquoteCoulmns(const string query) {
+string unquoteColumns(const string query) {
 	string moidified_query;
-	LOG(__FUNCTION__ << " query: " << query);
 	size_t previous_pos = 0;
+
 	for (size_t pos = query.find(" "); pos != std::string::npos; pos = query.substr(previous_pos, query.size() - previous_pos).find(" ")) {
 		string literal = query.substr(previous_pos, pos); //searching for every literal that is splitted by space
 		std::regex subcolumn_regex("\".+\"\\.\".+\\..+\""); // e.g. "bi_ex_net1_m"."entity.literal"
-		LOG("literal: " << literal);
+
 		if (std::regex_match(literal, subcolumn_regex)) {
 			LOG("Matches regex");
 			size_t column_delimeter = literal.find(".");
 			std::regex table_regex("\".+\""); //if table name contains "."
 			while (!std::regex_match(literal.substr(0, column_delimeter), table_regex)) {
-				column_delimeter = literal.substr(column_delimeter + 1, literal.size() - column_delimeter).find("."); //does not work
+				column_delimeter += literal.substr(column_delimeter + 1, literal.size() - column_delimeter).find(".") + 1;
 			}
 			string table_name = literal.substr(0, column_delimeter); //TODO log table_name, literal.size, column delimeter
 			moidified_query += table_name; //appending table name
 			moidified_query += "." + literal.substr(column_delimeter + 2, literal.size() - column_delimeter - 3); //skipping quotes
 		} else {
-			LOG("Does not match regex");
 			moidified_query += literal;
 		}
+
 		moidified_query += " ";
-		LOG(__FUNCTION__ << " pos:" << pos << " previous_pos:" << previous_pos << " modified_query: " << moidified_query);
-		previous_pos = previous_pos + pos + 1; //to skip current space symbol
+		previous_pos += pos + 1; //to skip current space symbol
 		}
+
 	return moidified_query;
 }
 
@@ -502,5 +502,5 @@ std::string replaceEscapeSequences(const std::string & query) {
     const char * ret_end = ret_start + ret.size();
     string replacedQuery = replaceForbiddenSequences(StringView(ret_start, ret_end));
 
-    return unquoteCoulmns(replacedQuery);
+    return unquoteColumns(replacedQuery);
 }

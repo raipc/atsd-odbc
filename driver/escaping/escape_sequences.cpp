@@ -430,33 +430,35 @@ string replaceForbiddenSequences(const StringView seq) {
 }
 
 string unquoteColumns(const string query) {
-	string moidified_query;
-	size_t previous_pos = 0;
+		string modified_query;
+		size_t previous_pos = 0;
+		StringView view = StringView(query);
+		Lexer lex(view);
 
-	for (size_t pos = query.find(" "); pos != std::string::npos; pos = query.substr(previous_pos, query.size() - previous_pos).find(" ")) {
-		string literal = query.substr(previous_pos, pos); //searching for every literal that is splitted by space
-		std::regex subcolumn_regex("\".+\"\\.\".+\\..+\""); // e.g. "bi_ex_net1_m"."entity.literal"
+		for (Token token = lex.Consume(); token.type != Token::EOS; token = lex.Consume()) {
+            string literal = token.literal.to_string();
+			if (token.type == Token::IDENT) {
+				std::regex column_regex("\"(entity|tags|metric)\\..+\"");
+				std::smatch match;
 
-		if (std::regex_match(literal, subcolumn_regex)) {
-			LOG("Matches regex");
-			size_t column_delimeter = literal.find(".");
-			std::regex table_regex("\".+\""); //if table name contains "."
-			while (!std::regex_match(literal.substr(0, column_delimeter), table_regex)) {
-				column_delimeter += literal.substr(column_delimeter + 1, literal.size() - column_delimeter).find(".") + 1;
+				if (std::regex_search(literal, match, column_regex)) {
+					string prefix = match.prefix().str(); //table name with "." symbol
+					modified_query += prefix;
+					string column = literal.substr(prefix.size(), literal.size() - prefix.size());
+					size_t delimeter_pos = column.find(".");
+					column.replace(delimeter_pos, 1, "\".\"");
+					modified_query += column;
+				} else {
+					modified_query += literal;
+				}
+			} else {
+				modified_query += literal;
 			}
-			string table_name = literal.substr(0, column_delimeter); //TODO log table_name, literal.size, column delimeter
-			moidified_query += table_name; //appending table name
-			moidified_query += "." + literal.substr(column_delimeter + 2, literal.size() - column_delimeter - 3); //skipping quotes
-		} else {
-			moidified_query += literal;
+			modified_query += " ";
 		}
 
-		moidified_query += " ";
-		previous_pos += pos + 1; //to skip current space symbol
-		}
-
-	return moidified_query;
-}
+		return modified_query;
+	}
 
 } // namespace
 

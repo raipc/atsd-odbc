@@ -60,6 +60,9 @@
     <ClInclude Include="..\..\driver\escaping\string_view.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
+	<ClInclude Include="..\..\driver\escaping\state_machine.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\driver\attr.cpp">
@@ -108,6 +111,9 @@
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
     <ClCompile Include="..\..\driver\environment.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+	<ClCompile Include="..\..\driver\escaping\state_machine.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
   </ItemGroup>

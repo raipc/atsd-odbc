@@ -1,5 +1,13 @@
 #include "state_machine.h"
 
+bool inTableKeywordsList(const std::string& literal) {
+    return std::find(TABLE_KEYWORDS_LIST.begin(), TABLE_KEYWORDS_LIST.end(), literal) != TABLE_KEYWORDS_LIST.end();
+};
+
+bool matchesColumnRegex(const std::string& literal) {
+    return std::regex_match(literal, COLUMN_REGEX);
+};
+
 BaseState* SelectState::nextState(const Token& nextToken) {
             const std::string literal = nextToken.literal.to_string();
             if(matchesColumnRegex(literal)) {

@@ -29,7 +29,7 @@ BaseState* ColumnState::nextState(const Token& nextToken) {
 	}
 	else if (literal == ",") {
 		//nextIsColumnOrFunction = true; //if next token is ",", then next state cannot be allies in select
-		return (BaseState*) new ColumnState(nextToken, stateMachine, true); //TODO set nextIsColumnOrFunction depending on allies list
+		return (BaseState*) new ColumnState(nextToken, stateMachine, !stateMachine.isInAlliesList(literal));
 	}
 	else if (matchesColumnRegex(literal)) {
 		if (!nextIsColumnOrFunction || stateMachine.isInAlliesList(literal)) {

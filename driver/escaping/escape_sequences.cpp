@@ -407,6 +407,7 @@ string processEscapeSequences(const StringView seq) {
 string replaceForbiddenSequences(const StringView seq) {
     Lexer lex(seq);
     string result;
+	lex.SetEmitSpaces(true);
 
     while(true) {
         const Token token(lex.Consume());
@@ -419,10 +420,8 @@ string replaceForbiddenSequences(const StringView seq) {
 
         if(replacement_map.find(token.literal.to_string()) != replacement_map.end()) {
             result += replacement_map.at(token.literal.to_string());
-            result += " ";
         } else {
             result += token.literal.to_string();
-            result += " ";
         }
     }
 
@@ -432,6 +431,7 @@ string replaceForbiddenSequences(const StringView seq) {
 string unquoteColumns(const string query) {
         StringView queryView(query);
         Lexer* lexer = new Lexer(queryView);
+		lexer->SetEmitSpaces(true);
 		StateMachine columnMachine(queryView, lexer);
         string modified_query = columnMachine.run();
         delete lexer;
@@ -477,7 +477,6 @@ std::string replaceEscapeSequences(const std::string & query) {
     if (st < p) {
         ret += std::string(st, p);
     }
-
     const char * ret_start = ret.c_str();
     const char * ret_end = ret_start + ret.size();
     string replacedQuery = replaceForbiddenSequences(StringView(ret_start, ret_end));

@@ -141,7 +141,6 @@ std::string StateMachine::run() {
 			modified_query += current_token.literal.to_string();
 		}
 
-		modified_query += " ";
 		const Token next_token = lex->LookAhead(0);
 		read_from_state = false;
 		if (to_upper(next_token.literal) == "SELECT") {

@@ -10,7 +10,7 @@ bool matchesColumnRegex(const std::string& literal) {
 }
 
 BaseState* SelectState::nextState(const Token& nextToken) {
-	const std::string literal = nextToken.literal.to_string();
+	const std::string literal = to_upper(nextToken.literal);
 	if (matchesColumnRegex(literal)) {
 		return (BaseState*) new ColumnState(nextToken, stateMachine);
 	}
@@ -20,7 +20,7 @@ BaseState* SelectState::nextState(const Token& nextToken) {
 };
 
 BaseState* ColumnState::nextState(const Token& nextToken) {
-	const std::string literal = nextToken.literal.to_string();
+	const std::string literal = to_upper(nextToken.literal);
 	if (inTableKeywordsList(literal)) {
 		return (BaseState*) new TableState(nextToken, stateMachine);
 	}
@@ -29,7 +29,7 @@ BaseState* ColumnState::nextState(const Token& nextToken) {
 	}
 	else if (literal == ",") {
 		//nextIsColumnOrFunction = true; //if next token is ",", then next state cannot be allies in select
-		return (BaseState*) new ColumnState(nextToken, stateMachine, !stateMachine.isInAlliesList(literal));
+		return (BaseState*) new ColumnState(nextToken, stateMachine, true);
 	}
 	else if (matchesColumnRegex(literal)) {
 		if (!nextIsColumnOrFunction || stateMachine.isInAlliesList(literal)) {
@@ -59,7 +59,7 @@ std::string ColumnState::convert() {
 }
 
 BaseState* AlliesState::nextState(const Token& nextToken) {
-	const std::string literal = nextToken.literal.to_string();
+	const std::string literal = to_upper(nextToken.literal);
 	if (literal == ",") {
 		return (BaseState*) new AlliesState(nextToken, stateMachine);
 	}
@@ -86,7 +86,7 @@ AlliesState::AlliesState(const Token& token, StateMachine& stateMachine) : BaseS
 };
 
 BaseState* FunctionOrClauseState::nextState(const Token& nextToken) {
-	const std::string literal = nextToken.literal.to_string();
+	const std::string literal = to_upper(nextToken.literal);
 	if (literal == ",") {
 		return (BaseState*) new FunctionOrClauseState(nextToken, stateMachine);
 	}
@@ -105,8 +105,8 @@ BaseState* FunctionOrClauseState::nextState(const Token& nextToken) {
 }
 
 BaseState* TableState::nextState(const Token& nextToken) {
-	const std::string literal = nextToken.literal.to_string();
-	if (literal == "AS" || matchesColumnRegex(literal)) {
+	const std::string literal = to_upper(nextToken.literal);
+	if (literal == "AS" || matchesColumnRegex(literal) || inTableKeywordsList(to_upper(token.literal))) {
 		return (BaseState*) new TableState(nextToken, stateMachine);
 	}
 	else {

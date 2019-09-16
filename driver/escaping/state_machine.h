@@ -6,6 +6,7 @@
 #include <regex>
 #include <list>
 #include <algorithm>
+//#include "../log/log.h"
 
 
 #define DECLARE2(NAME, IGNORE) Token::NAME
@@ -14,8 +15,8 @@ const std::list<Token::Type> function_list{
 };
 #undef DECLARE2
 
-const std::regex COLUMN_REGEX(".*\\.?\"?(entity|tags|metric|text|value|time|datetime|[0-9])\\.?.*\"?");
-const std::regex COLUMN_WITH_POINT_REGEX("\"(entity|tags|metric)\\..+\"");
+const std::regex COLUMN_REGEX(".*\\.?\"?(ENTITY|TAGS|METRIC|TEXT|VALUE|TIME|DATETIME|[0-9]+)\\.?.*\"?");
+const std::regex COLUMN_WITH_POINT_REGEX("\"((e|E)(n|N)(t|T)(i|I)(t|T)(y|Y)|(t|T)(a|A)(g|G)(s|S)|(m|M)(e|E)(t|T)(r|R)(i|I)(c|C))\\..+\"");
 const std::list<std::string> TABLE_KEYWORDS_LIST = { //list of keywords after which tables and there allies are declared
         "FROM",
         "JOIN"
@@ -36,7 +37,7 @@ class BaseState {
 			return this;
 		}
     protected:
-        const Token& token;
+        const Token token;
         StateMachine& stateMachine;
 };
 

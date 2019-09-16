@@ -122,7 +122,7 @@ std::string StateMachine::run() {
 	}
 	currentState = (BaseState*) new SelectState(current_token, *this);
 	bool read_from_state = true;
-	for (; (current_token.type != Token::EOS) && (level >= 0); current_token = lex->Consume()) {
+	while((current_token.type != Token::EOS) && (level >= 0)) {
 		if (read_from_state) {
 			modified_query += currentState->convert();
 		}
@@ -133,6 +133,9 @@ std::string StateMachine::run() {
 		else if (current_token.type == Token::RPARENT) {
 			level--;
 			modified_query += ")";
+			if (level < 0) {
+				break;
+			}
 		}
 		else {
 			modified_query += current_token.literal.to_string();
@@ -152,6 +155,7 @@ std::string StateMachine::run() {
 			currentState = next_state;
 			read_from_state = true;
 		}
+		current_token = lex->Consume();
 	}
 	return modified_query;
 }

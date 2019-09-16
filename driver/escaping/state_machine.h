@@ -23,27 +23,32 @@ const std::list<std::string> TABLE_KEYWORDS_LIST = { //list of keywords after wh
 
 class StateMachine;
 
+bool inTableKeywordsList(const std::string& literal);
+bool matchesColumnRegex(const std::string& literal);
+
 class BaseState {
     public:
         explicit BaseState(const Token& token, StateMachine& stateMachine): token(token), stateMachine(stateMachine) {};
         virtual std::string convert() {
             return token.literal.to_string();
         };
-        virtual BaseState* nextState(const Token& nextToken) = 0;
+		virtual BaseState* nextState(const Token& nextToken) {
+			return this;
+		}
     protected:
         const Token& token;
         StateMachine& stateMachine;
 };
 
-class IntermediateState : BaseState { //techincal state for situations when state cannot be changed with one token and requires one more. e.g. "AS" token
+/*class IntermediateState : BaseState { //techincal state for situations when state cannot be changed with one token and requires one more. e.g. "AS" token
     public:
-        explicit IntermediateState(const Token& token, StateMachine& stateMachine, BaseState* parentState): BaseState(token, stateMachine), parentState(parentState) {};
+		explicit IntermediateState(const Token& token, StateMachine& stateMachine, BaseState* parentState) : BaseState(token, stateMachine), parentState(*parentState) {}
         BaseState* nextState(const Token& nextToken) {
-            return (BaseState*) parentState->nextState(nextToken);
+            return (BaseState*) parentState.nextState(nextToken);
         }
     private:
-        BaseState* parentState;
-};
+        BaseState parentState;
+}; */
 
 class SelectState : BaseState {
     public:
@@ -54,6 +59,7 @@ class SelectState : BaseState {
 class ColumnState : BaseState {
     public:
         explicit ColumnState(const Token& token, StateMachine& stateMachine): BaseState(token, stateMachine), nextIsColumnOrFunction(false) {};
+		explicit ColumnState(const Token& token, StateMachine& stateMachine, bool nextIsColumnOrFunction) : BaseState(token, stateMachine), nextIsColumnOrFunction(nextIsColumnOrFunction) {}
         BaseState* nextState(const Token& nextToken);
         std::string convert();
     private:

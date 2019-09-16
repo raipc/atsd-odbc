@@ -106,7 +106,7 @@ BaseState* FunctionOrClauseState::nextState(const Token& nextToken) {
 
 BaseState* TableState::nextState(const Token& nextToken) {
 	const std::string literal = to_upper(nextToken.literal);
-	if (literal == "AS" || matchesColumnRegex(literal) || inTableKeywordsList(to_upper(token.literal))) {
+	if (literal == "AS" || matchesColumnRegex(literal) || inTableKeywordsList(to_upper(token.literal)) || inTableKeywordsList(literal)) {
 		return (BaseState*) new TableState(nextToken, stateMachine);
 	}
 	else {

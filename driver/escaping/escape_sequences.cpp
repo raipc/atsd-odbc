@@ -69,7 +69,6 @@ const std::map<const Token::Type, const std::string> units_map{
 };
 
 const std::map<const std::string, const std::string> replacement_map {
-    {"DISTINCT", ""},
 };
 
 
@@ -405,6 +404,9 @@ string processEscapeSequences(const StringView seq) {
 }
 
 string replaceForbiddenSequences(const StringView seq) {
+	if (replacement_map.empty()) {
+		return seq.to_string();
+	}
     Lexer lex(seq);
     string result;
 	lex.SetEmitSpaces(true);

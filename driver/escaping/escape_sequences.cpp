@@ -11,7 +11,7 @@
 #include <map>
 #include "lexer.h"
 #include "..\log/log.h"
-#include <regex>
+#include "state_machine.h"
 
 
 using namespace std;
@@ -407,6 +407,7 @@ string processEscapeSequences(const StringView seq) {
 string replaceForbiddenSequences(const StringView seq) {
     Lexer lex(seq);
     string result;
+	lex.SetEmitSpaces(true);
 
     while(true) {
         const Token token(lex.Consume());
@@ -419,10 +420,8 @@ string replaceForbiddenSequences(const StringView seq) {
 
         if(replacement_map.find(token.literal.to_string()) != replacement_map.end()) {
             result += replacement_map.at(token.literal.to_string());
-            result += " ";
         } else {
             result += token.literal.to_string();
-            result += " ";
         }
     }
 
@@ -430,33 +429,12 @@ string replaceForbiddenSequences(const StringView seq) {
 }
 
 string unquoteColumns(const string query) {
-		string modified_query;
-		size_t previous_pos = 0;
-		StringView view = StringView(query);
-		Lexer lex(view);
-
-		for (Token token = lex.Consume(); token.type != Token::EOS; token = lex.Consume()) {
-            string literal = token.literal.to_string();
-			if (token.type == Token::IDENT) {
-				std::regex column_regex("\"(entity|tags|metric)\\..+\"");
-				std::smatch match;
-
-				if (std::regex_search(literal, match, column_regex)) {
-					string prefix = match.prefix().str(); //table name with "." symbol
-					modified_query += prefix;
-					string column = literal.substr(prefix.size(), literal.size() - prefix.size());
-					size_t delimeter_pos = column.find(".");
-					column.replace(delimeter_pos, 1, "\".\"");
-					modified_query += column;
-				} else {
-					modified_query += literal;
-				}
-			} else {
-				modified_query += literal;
-			}
-			modified_query += " ";
-		}
-
+        StringView queryView(query);
+        Lexer* lexer = new Lexer(queryView);
+		lexer->SetEmitSpaces(true);
+		StateMachine columnMachine(queryView, lexer);
+        string modified_query = columnMachine.run();
+        delete lexer;
 		return modified_query;
 	}
 
@@ -499,7 +477,6 @@ std::string replaceEscapeSequences(const std::string & query) {
     if (st < p) {
         ret += std::string(st, p);
     }
-
     const char * ret_start = ret.c_str();
     const char * ret_end = ret_start + ret.size();
     string replacedQuery = replaceForbiddenSequences(StringView(ret_start, ret_end));

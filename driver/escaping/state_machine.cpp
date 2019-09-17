@@ -120,7 +120,7 @@ std::string StateMachine::run() {
 	if (to_upper(current_token.literal) != "SELECT") {
 		return queryView.to_string();
 	}
-	currentState = std::unique_ptr<BaseState>(new SelectState(current_token, *this));
+	currentState.reset(new SelectState(current_token, *this));
 	bool read_from_state = true;
 	while((current_token.type != Token::EOS) && (level >= 0)) {
 		if (read_from_state) {
@@ -149,7 +149,7 @@ std::string StateMachine::run() {
 			level--;
 		}
 		else if ((next_token.type == Token::IDENT) || (next_token.type == Token::COMMA) || (std::find(function_list.begin(), function_list.end(), next_token.type) != function_list.end())) {
-			currentState = std::unique_ptr<BaseState>(currentState->nextState(next_token));
+			currentState.reset(currentState->nextState(next_token));
 			read_from_state = true;
 		}
 		current_token = lex->Consume();

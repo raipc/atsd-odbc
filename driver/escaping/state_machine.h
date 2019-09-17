@@ -6,6 +6,7 @@
 #include <regex>
 #include <list>
 #include <algorithm>
+#include <memory>
 //#include "../log/log.h"
 
 
@@ -51,13 +52,13 @@ class BaseState {
         BaseState parentState;
 }; */
 
-class SelectState : BaseState {
+class SelectState : public BaseState {
     public:
         explicit SelectState(const Token& token, StateMachine& stateMachine): BaseState(token, stateMachine) {};
         BaseState* nextState(const Token& nextToken);
 };
 
-class ColumnState : BaseState {
+class ColumnState : public BaseState {
     public:
         explicit ColumnState(const Token& token, StateMachine& stateMachine): BaseState(token, stateMachine), nextIsColumnOrFunction(false) {};
 		explicit ColumnState(const Token& token, StateMachine& stateMachine, bool nextIsColumnOrFunction) : BaseState(token, stateMachine), nextIsColumnOrFunction(nextIsColumnOrFunction) {}
@@ -67,19 +68,19 @@ class ColumnState : BaseState {
         bool nextIsColumnOrFunction;
 };
 
-class AlliesState : BaseState {
+class AlliesState : public BaseState {
     public:
         explicit AlliesState(const Token& token, StateMachine& stateMachine);
         BaseState* nextState(const Token& nextToken);
 };
 
-class FunctionOrClauseState : BaseState {
+class FunctionOrClauseState : public BaseState {
     public:
         explicit FunctionOrClauseState(const Token& token, StateMachine& stateMachine): BaseState(token, stateMachine) {};
         BaseState* nextState(const Token& nextToken);
 };
 
-class TableState : BaseState {
+class TableState : public BaseState {
     public:
         explicit TableState(const Token& token, StateMachine& stateMachine): BaseState(token, stateMachine) {};
         BaseState* nextState(const Token& nextToken);
@@ -100,6 +101,6 @@ class StateMachine {
         Lexer* lex;
         int level;
         const StringView queryView;
-        BaseState* currentState;
+        std::unique_ptr<BaseState> currentState;
         std::list<std::string> alliesList;
 };

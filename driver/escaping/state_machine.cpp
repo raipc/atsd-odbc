@@ -12,35 +12,35 @@ bool matchesColumnRegex(const std::string& literal) {
 BaseState* SelectState::nextState(const Token& nextToken) {
 	const std::string literal = to_upper(nextToken.literal);
 	if (matchesColumnRegex(literal)) {
-		return (BaseState*) new ColumnState(nextToken, stateMachine);
+		return new ColumnState(nextToken, stateMachine);
 	}
 	else {
-		return (BaseState*) new FunctionOrClauseState(nextToken, stateMachine);
+		return new FunctionOrClauseState(nextToken, stateMachine);
 	}
 };
 
 BaseState* ColumnState::nextState(const Token& nextToken) {
 	const std::string literal = to_upper(nextToken.literal);
 	if (inTableKeywordsList(literal)) {
-		return (BaseState*) new TableState(nextToken, stateMachine);
+		return new TableState(nextToken, stateMachine);
 	}
 	else if (literal == "AS") {
-		return (BaseState*) new ColumnState(nextToken, stateMachine);
+		return new ColumnState(nextToken, stateMachine);
 	}
 	else if (literal == ",") {
 		//nextIsColumnOrFunction = true; //if next token is ",", then next state cannot be allies in select
-		return (BaseState*) new ColumnState(nextToken, stateMachine, true);
+		return new ColumnState(nextToken, stateMachine, true);
 	}
 	else if (matchesColumnRegex(literal)) {
 		if (!nextIsColumnOrFunction || stateMachine.isInAlliesList(literal)) {
-			return (BaseState*) new AlliesState(nextToken, stateMachine);
+			return new AlliesState(nextToken, stateMachine);
 		}
 		else {
-			return (BaseState*) new ColumnState(nextToken, stateMachine);
+			return new ColumnState(nextToken, stateMachine);
 		}
 	}
 	else {
-		return (BaseState*) new FunctionOrClauseState(nextToken, stateMachine);
+		return new FunctionOrClauseState(nextToken, stateMachine);
 	}
 }
 std::string ColumnState::convert() {
@@ -61,19 +61,19 @@ std::string ColumnState::convert() {
 BaseState* AlliesState::nextState(const Token& nextToken) {
 	const std::string literal = to_upper(nextToken.literal);
 	if (literal == ",") {
-		return (BaseState*) new AlliesState(nextToken, stateMachine);
+		return new AlliesState(nextToken, stateMachine);
 	}
 	else if (stateMachine.isInAlliesList(literal)) {
-		return (BaseState*) new AlliesState(nextToken, stateMachine);
+		return new AlliesState(nextToken, stateMachine);
 	}
 	else if (inTableKeywordsList(literal)) {
-		return (BaseState*) new TableState(nextToken, stateMachine);
+		return new TableState(nextToken, stateMachine);
 	}
 	else if (matchesColumnRegex(literal)) {
-		return (BaseState*) new ColumnState(nextToken, stateMachine);
+		return new ColumnState(nextToken, stateMachine);
 	}
 	else {
-		return (BaseState*) new FunctionOrClauseState(nextToken, stateMachine);
+		return new FunctionOrClauseState(nextToken, stateMachine);
 	}
 }
 
@@ -88,29 +88,29 @@ AlliesState::AlliesState(const Token& token, StateMachine& stateMachine) : BaseS
 BaseState* FunctionOrClauseState::nextState(const Token& nextToken) {
 	const std::string literal = to_upper(nextToken.literal);
 	if (literal == ",") {
-		return (BaseState*) new FunctionOrClauseState(nextToken, stateMachine);
+		return new FunctionOrClauseState(nextToken, stateMachine);
 	}
 	else if (stateMachine.isInAlliesList(literal)) {
-		return (BaseState*) new AlliesState(nextToken, stateMachine);
+		return new AlliesState(nextToken, stateMachine);
 	}
 	else if (inTableKeywordsList(literal)) {
-		return (BaseState*) new TableState(nextToken, stateMachine);
+		return new TableState(nextToken, stateMachine);
 	}
 	else if (matchesColumnRegex(literal)) {
-		return (BaseState*) new ColumnState(nextToken, stateMachine);
+		return new ColumnState(nextToken, stateMachine);
 	}
 	else {
-		return (BaseState*) new FunctionOrClauseState(nextToken, stateMachine);
+		return new FunctionOrClauseState(nextToken, stateMachine);
 	}
 }
 
 BaseState* TableState::nextState(const Token& nextToken) {
 	const std::string literal = to_upper(nextToken.literal);
 	if (literal == "AS" || matchesColumnRegex(literal) || inTableKeywordsList(to_upper(token.literal)) || inTableKeywordsList(literal)) {
-		return (BaseState*) new TableState(nextToken, stateMachine);
+		return new TableState(nextToken, stateMachine);
 	}
 	else {
-		return (BaseState*) new FunctionOrClauseState(nextToken, stateMachine);
+		return new FunctionOrClauseState(nextToken, stateMachine);
 	}
 }
 
@@ -120,7 +120,7 @@ std::string StateMachine::run() {
 	if (to_upper(current_token.literal) != "SELECT") {
 		return queryView.to_string();
 	}
-	currentState = (BaseState*) new SelectState(current_token, *this);
+	currentState = std::unique_ptr<BaseState>(new SelectState(current_token, *this));
 	bool read_from_state = true;
 	while((current_token.type != Token::EOS) && (level >= 0)) {
 		if (read_from_state) {
@@ -149,9 +149,7 @@ std::string StateMachine::run() {
 			level--;
 		}
 		else if ((next_token.type == Token::IDENT) || (next_token.type == Token::COMMA) || (std::find(function_list.begin(), function_list.end(), next_token.type) != function_list.end())) {
-			BaseState* next_state = currentState->nextState(next_token);
-			delete currentState;
-			currentState = next_state;
+			currentState = std::unique_ptr<BaseState>(currentState->nextState(next_token));
 			read_from_state = true;
 		}
 		current_token = lex->Consume();

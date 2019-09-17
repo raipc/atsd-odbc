@@ -36,3 +36,6 @@ vs/installer32/obj/*
 vs/installer32/bin/*
 vs/installer64/obj/*
 vs/installer64/bin/*
+vs/Backup*/
+vs/UpgradeLog*
+vs/log.txt

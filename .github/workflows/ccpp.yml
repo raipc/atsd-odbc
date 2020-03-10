@@ -16,4 +16,4 @@ jobs:
       with:
         submodules: true
     - name: build
-      run: msbuild vs/odbc64.sln
+      run: vs/build_cmake.bat

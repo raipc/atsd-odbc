@@ -16,4 +16,4 @@ jobs:
       with:
         submodules: true
     - name: build
-      run: vs/build_cmake.bat
+      run: call vs/build_cmake.bat
